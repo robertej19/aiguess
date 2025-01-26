@@ -30,10 +30,11 @@ def annotate_image(frame, text,x_pos=None,y_pos=None):
     
     return frame
 
-def show_bgr(frame,w=5):
+def show_bgr(frame,w=5,title=""):
     plt.figure(figsize=(w,int(w/1.6)))
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     plt.imshow(frame_rgb)
+    plt.title(title)
     plt.show()
 
 

@@ -8,7 +8,7 @@ from sklearn.linear_model import LinearRegression
 from skimage.transform import rotate,warp
 
 from utils.detection_tools import detect_sky, estimate_horizon_line_by_edges, create_line_roi_mask_vectorized
-from utils.detection_tools import rectify_horizon, downsampler, translate_vertical
+from utils.detection_tools import rectify_horizon, downsampler, translate_vertical, rotate_and_center_horizon
 from utils.common_tools import annotate_image, show_bgr
 
 def find_birds(raw_frame):
@@ -42,7 +42,9 @@ def find_birds(raw_frame):
     base_image_rgb = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2RGB)
     
     
-    rectified_frame = rectify_horizon(raw_frame, slope, intercept*scale_factor)
+    #rectified_frame = rectify_horizon(raw_frame, slope, intercept*scale_factor)
+
+    rectified_frame = rotate_and_center_horizon(raw_frame,slope,intercept*scale_factor)
     
     height, width = raw_frame.shape[:2]
     
@@ -112,159 +114,11 @@ def find_birds(raw_frame):
         text = f"Detected Centroid: ({cx}, {cy}), Size: {w}x{h} pixels"
         annotate_image(base_image, text)
 
-        return base_image, cx,cy,w,h
+        return rectified_frame, cx,cy,w,h
     else:
         text = f"Detected Centroid: ({0}, {0}), Size: {0}x{0} pixels"
 
         annotate_image(base_image,text)
         
-        return base_image, 0,0,0,0
+        return rectified_frame, 0,0,0,0
 
-
-
-"""
-
-#base_image = cv2.imread("images/base_images/horizon_2.png")
-image_list = ["horizon_2","horizon_4"]
-work_dir = os.getcwd()
-
-video_path = "synth_track_video.mp4"
-cap = cv2.VideoCapture(video_path)
-
-if not cap.isOpened():
-    raise ValueError(f"Error opening video file: {video_path}")
-
-frame_number = 25
-# Set the frame position (0-based index)
-frame_index = frame_number - 1
-cap.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
-
-# Read the frame
-ret, raw_frame = cap.read()
-show_bgr(raw_frame)
-
-base_image = raw_frame
-image = raw_frame#[400:1800, 1100:1500]
-s = 4
-sky_mask = detect_sky(raw_frame)
-downsampled_sky_mask = downsampler(sky_mask,scale_factor=s)
-
-plt.imshow(downsampled_sky_mask,cmap = 'gray')
-plt.show()
-
-
-result = estimate_horizon_line_by_edges(downsampled_sky_mask)
-
-if result is None:
-    #raise ValueError("estimate_horizon_line_by_edges() returned None. Check the input or the function logic.")
-    slope,intercept = 0, downsampled_sky_mask.shape[0]/2
-else:
-    slope, intercept = result
-
-
-print("Estimated horizon line: y = {:.3f} x + {:.3f}".format(slope, intercept))
-
-h,w = downsampled_sky_mask.shape
-
-x_start, x_end = 0, w - 1
-y_start = int(slope * x_start + intercept)
-y_end   = int(slope * x_end   + intercept)
-#############################################
-### SKY ROI CREATED
-###########################################
-print(x_start,y_start,x_end,y_end)
-cv2.line(downsampled_sky_mask, (x_start, y_start), (x_end, y_end), (0, 0, 255), 1)
-
-plt.imshow(downsampled_sky_mask)
-plt.show()
-
-cv2.line(raw_frame, (x_start*s, y_start*s), (x_end*s, y_end*s), (0, 0, 255), 5)
-base_image_rgb = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2RGB)
-
-show_bgr(base_image_rgb)
-
-rectified_frame = rectify_horizon(raw_frame, slope, intercept)
-show_bgr(rectified_frame)
-
-height, width = raw_frame.shape[:2]
-
-top_left = (0,0)
-top_right = (width,0)
-bottom_left = (x_start*s, .8*y_start*s)
-bottom_right =  (x_end*s, .8*y_end*s)
-
-# 2. Define the polygon by the corner points in proper order.
-#    Make sure to use np.int32 and shape (n_points, 1, 2) or (n_points, 2) for fillPoly.
-roi_corners = np.array([
-    [top_left[0],      top_left[1]],
-    [top_right[0],     top_right[1]],
-    [bottom_right[0],  bottom_right[1]],
-    [bottom_left[0],   bottom_left[1]]
-], dtype=np.int32)
-
-# 3. Create an empty (black) mask the same size as your frame.
-polygon_roi_mask = np.zeros((height, width), dtype=np.uint8)
-
-# 4. Fill the polygon on the mask with white (255).
-cv2.fillPoly(polygon_roi_mask, [roi_corners], 255)
-
-# 5. (Optional) Use the mask to extract the region of interest from the original frame.
-#    bitwise_and will keep only the pixels where mask is non-zero.
-masked_frame_sky_roi = cv2.bitwise_and(raw_frame, raw_frame, mask=polygon_roi_mask)
-
-
-show_bgr(masked_frame_sky_roi)
-
-gray_roi = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2GRAY)
-show_bgr(gray_roi)
-kernel_size=(3, 3)
-sigma=0.5
-gaussian_blur = cv2.GaussianBlur(gray_roi, kernel_size, sigma)
-
-sobel_threshold=50
-#canny_edges = cv2.Canny(gray_roi, threshold1=50, threshold2=150)
-sobelx = cv2.Sobel(gray_roi, cv2.CV_64F, 1, 0, ksize=3)
-sobely = cv2.Sobel(gray_roi, cv2.CV_64F, 0, 1, ksize=3)
-sobel = cv2.magnitude(sobelx, sobely)
-sobel = cv2.convertScaleAbs(sobel)
-
-show_bgr(sobel)
-
-_, sobel_mask = cv2.threshold(sobel, sobel_threshold, 255, cv2.THRESH_BINARY)
-
-edges_in_roi = cv2.bitwise_and(sobel_mask, polygon_roi_mask)
-
-
-# -- Optional: Morphological operations (e.g., close small gaps) --
-# kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3,3))
-# mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel)
-
-# -- 3. Find contours in the binary mask --
-contours, _ = cv2.findContours(edges_in_roi, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-largest_contour = max(contours, key=cv2.contourArea)
-x, y, w, h = cv2.boundingRect(largest_contour)
-bounding_box = (x, y, w, h)
-
-# Centroid using image moments
-M = cv2.moments(largest_contour)
-if M["m00"] != 0:
-    cx = int(M["m10"] / M["m00"])
-    cy = int(M["m01"] / M["m00"])
-    centroid = (cx, cy)
-else:
-    # Fallback: if area is zero (degenerate contour),
-    # pick the center of the bounding box
-    centroid = (x + w // 2, y + h // 2)
-
-print(bounding_box)
-print(cx,cy)
-
-# Draw bounding box and centroid on the original image
-cv2.rectangle(base_image, (x, y), (x+w, y+h), (0, 255, 0), 2)
-#cv2.circle(roi, (cx, cy), 4, (0, 0, 255), -1)
-annotate_image(base_image, cx, cy, w, h)
-
-show_bgr(base_image)
-
-
-"""
