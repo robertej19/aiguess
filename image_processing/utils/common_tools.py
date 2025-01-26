@@ -293,8 +293,8 @@ def draw_parallel_lines(frame,sky_mask, slope, intercept, distance=10):
     red_within_sky = is_line_within_mask(sky_mask, (int(red_x1), int(red_y1)), (int(red_x2), int(red_y2)))
 
     # Display results
-    print("Blue line within sky_mask:", blue_within_sky)
-    print("Red line within sky_mask:", red_within_sky)
+    #print("Blue line within sky_mask:", blue_within_sky)
+    #print("Red line within sky_mask:", red_within_sky)
 
 
 
@@ -303,11 +303,11 @@ def draw_parallel_lines(frame,sky_mask, slope, intercept, distance=10):
     if blue_within_sky:
         selected_line_start = (int(blue_x1), int(blue_y1))
         selected_line_end = (int(blue_x2), int(blue_y2))
-        perpendicular_direction = (int(-100 * dy), int(100 * dx))  # Direction from blue line
+        perpendicular_direction = (int(-150 * dy), int(150 * dx))  # Direction from blue line
     elif red_within_sky:
         selected_line_start = (int(red_x1), int(red_y1))
         selected_line_end = (int(red_x2), int(red_y2))
-        perpendicular_direction = (int(100 * dy), int(-100 * dx))  # Direction from red line
+        perpendicular_direction = (int(150 * dy), int(-150 * dx))  # Direction from red line
     else:
         selected_line_start = None
         selected_line_end = None
@@ -339,15 +339,28 @@ def create_one_sided_region_mask(sky_mask, line_start, line_end, perpendicular_d
     dx, dy = perpendicular_direction
 
     # Extend the line to form a region
+    # Extend the line to form a region
     height, width = sky_mask.shape
-    if dx > 0:
-        # Extend to the right edge
-        extended_start = (width, int(line_start[1] + (width - line_start[0]) * (dy / dx)))
-        extended_end = (width, int(line_end[1] + (width - line_end[0]) * (dy / dx)))
+
+    if dx == 0:
+        # Line is vertical
+        if dy > 0:
+            # Extend upward to the top edge of the frame
+            extended_start = (int(line_start[0]), 0)
+            extended_end = (int(line_end[0]), 0)
+        else:
+            # Extend downward to the bottom edge of the frame
+            extended_start = (int(line_start[0]), height)
+            extended_end = (int(line_end[0]), height)
     else:
-        # Extend to the left edge
-        extended_start = (0, int(line_start[1] - line_start[0] * (dy / dx)))
-        extended_end = (0, int(line_end[1] - line_end[0] * (dy / dx)))
+        if dx > 0:
+            # Extend to the right edge
+            extended_start = (width, int(line_start[1] + (width - line_start[0]) * (dy / dx)))
+            extended_end = (width, int(line_end[1] + (width - line_end[0]) * (dy / dx)))
+        else:
+            # Extend to the left edge
+            extended_start = (0, int(line_start[1] - line_start[0] * (dy / dx)))
+            extended_end = (0, int(line_end[1] - line_end[0] * (dy / dx)))
 
     # Define the polygon points for the region
     polygon_points = np.array([
