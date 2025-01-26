@@ -88,6 +88,8 @@ def generate_sequence(
     output_file = open(log_file_name, "w")
     output_file.write("frame_number,local_dot_x_truth,local_dot_y_truth,yaw_deg,pitch_deg,zoom,global_dot_x_truth,global_dot_y_truth,global_dot_size_truth\n")
     
+    roll_start_deg = -180
+    roll_end_deg = 180
 
 
     for i in range(num_frames):
@@ -100,6 +102,7 @@ def generate_sequence(
         # Current zoom
         zoom = zoom_start + t * (zoom_end - zoom_start)
 
+
         # Current pitch in degrees (negative => looking up)
         pitch_deg = pitch_start_deg + t * (pitch_end_deg - pitch_start_deg)
         pitch_rad = math.radians(pitch_deg)
@@ -107,6 +110,10 @@ def generate_sequence(
         # Current yaw in degrees: oscillate +/- yaw_amplitude_deg
         yaw_deg = yaw_amplitude_deg * math.sin(2.0 * math.pi * i / yaw_period)
         yaw_rad = math.radians(yaw_deg)
+
+        # --- NEW: Current roll (e.g., from start->end or fixed) ---
+        roll_deg = roll_start_deg + t * (roll_end_deg - roll_start_deg)
+        roll_rad = math.radians(roll_deg)
 
         # ---- STEP 1: Place the moving dot in the large image before warping ----
         dot_x_center = dot_initial_x + dot_inter_frame_speed * i
@@ -136,14 +143,23 @@ def generate_sequence(
         # Apply zoom
         local_corners *= zoom
 
-        # Apply in-plane yaw rotation
+        # --- YAW Transform (existing in-plane rotation) ---
         cos_yaw = math.cos(yaw_rad)
         sin_yaw = math.sin(yaw_rad)
-        R = np.array([
-            [cos_yaw, -sin_yaw],
-            [sin_yaw,  cos_yaw]
+        R_yaw = np.array([
+            [ cos_yaw, -sin_yaw],
+            [ sin_yaw,  cos_yaw]
         ], dtype=np.float32)
-        local_corners = local_corners @ R.T  # rotate around (0,0)
+        local_corners = local_corners @ R_yaw.T
+
+        # --- ROLL Transform (new in-plane rotation) ---
+        cos_roll = math.cos(roll_rad)
+        sin_roll = math.sin(roll_rad)
+        R_roll = np.array([
+            [ cos_roll, -sin_roll],
+            [ sin_roll,  cos_roll]
+        ], dtype=np.float32)
+        local_corners = local_corners @ R_roll.T
 
         # Approximate pitch by shifting top/bottom edges differently
         pitch_factor = 0.002
