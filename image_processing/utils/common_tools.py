@@ -247,7 +247,20 @@ def stack_videos(video1_path,
 
 
 
-def draw_parallel_lines(frame, slope, intercept, distance=10):
+def is_line_within_mask(sky_mask, line_start, line_end):
+    # Create a blank mask with the same size as the sky_mask
+    line_mask = np.zeros_like(sky_mask, dtype=np.uint8)
+
+    # Draw the line on the blank mask (white line)
+    cv2.line(line_mask, line_start, line_end, 255, 1)
+
+    # Check overlap between the line_mask and the sky_mask
+    overlap = cv2.bitwise_and(sky_mask, line_mask)
+
+    # If any overlap exists, the line is within the mask
+    return np.any(overlap > 0)
+
+def draw_parallel_lines(frame,sky_mask, slope, intercept, distance=10):
     # Height and width of the frame
     height, width, _ = frame.shape
     
@@ -275,6 +288,15 @@ def draw_parallel_lines(frame, slope, intercept, distance=10):
     red_x1, red_y1 = x1 - perp_dx, y1 - perp_dy
     red_x2, red_y2 = x2 - perp_dx, y2 - perp_dy
 
+    # Check if the blue or red line is within the sky_mask
+    blue_within_sky = is_line_within_mask(sky_mask, (int(blue_x1), int(blue_y1)), (int(blue_x2), int(blue_y2)))
+    red_within_sky = is_line_within_mask(sky_mask, (int(red_x1), int(red_y1)), (int(red_x2), int(red_y2)))
+
+    # Display results
+    print("Blue line within sky_mask:", blue_within_sky)
+    print("Red line within sky_mask:", red_within_sky)
+
+
     # Draw the original line (optional for reference)
     cv2.line(frame, (int(x1), int(y1)), (int(x2), int(y2)), (255, 255, 255), 1)
 
@@ -284,17 +306,4 @@ def draw_parallel_lines(frame, slope, intercept, distance=10):
     # Draw the red parallel line
     cv2.line(frame, (int(red_x1), int(red_y1)), (int(red_x2), int(red_y2)), (0, 0, 255), 2)
 
-# Create a blank image
-frame = np.zeros((400, 400, 3), dtype=np.uint8)
-
-# Example line with slope and intercept
-slope = 0.5
-intercept = 100
-
-# Draw parallel lines
-draw_parallel_lines(frame, slope, intercept)
-
-# Display the result
-cv2.imshow("Frame with Parallel Lines", frame)
-cv2.waitKey(0)
-cv2.destroyAllWindows()
+    return frame
