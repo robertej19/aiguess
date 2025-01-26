@@ -214,7 +214,7 @@ def generate_sequence(
         filename_box = os.path.join(output_dir_box, f"frame_{frame_number:03}_box.jpg")
         filename_pose = os.path.join(output_dir_pose, f"frame_{frame_number:03}_pose.jpg")
 
-        text = f"Object: ({int(cx)}, {int(cy)}), {int(dot_size)} pixels wide | Camera: {int(yaw_deg)} Yaw, {int(pitch_deg)} Pitch, {zoom:.1f} Zoom"
+        text = f"Object: ({int(dot_x_center)}, {int(dot_y_center)}), {int(dot_size)} pixels wide | Camera: {int(yaw_deg)} Yaw, {int(pitch_deg)} Pitch, {zoom:.1f} Zoom"
 
         img_pose = annotate_image(img_pose,text)
         

@@ -44,7 +44,6 @@ def find_birds(raw_frame):
     
     #rectified_frame = rectify_horizon(raw_frame, slope, intercept*scale_factor)
 
-    rectified_frame = rotate_and_center_horizon(raw_frame,slope,intercept*scale_factor)
     
     height, width = raw_frame.shape[:2]
     
@@ -110,15 +109,24 @@ def find_birds(raw_frame):
         
         # Draw bounding box and centroid on the original image
         cv2.rectangle(base_image, (x, y), (x+w, y+h), (0, 255, 0), 4)
+
+        rectified_frame = rotate_and_center_horizon(base_image,slope,intercept*scale_factor)
+
+
         #cv2.circle(roi, (cx, cy), 4, (0, 0, 255), -1)
         text = f"Detected Centroid: ({cx}, {cy}), Size: {w}x{h} pixels"
         annotate_image(base_image, text)
+        annotate_image(rectified_frame, text)
 
-        return rectified_frame, cx,cy,w,h
+
+        return rectified_frame,base_image, cx,cy,w,h
     else:
         text = f"Detected Centroid: ({0}, {0}), Size: {0}x{0} pixels"
 
         annotate_image(base_image,text)
+        rectified_frame = rotate_and_center_horizon(base_image,slope,intercept*scale_factor)
+        annotate_image(rectified_frame, text)
+
         
-        return rectified_frame, 0,0,0,0
+        return rectified_frame, base_image, 0,0,0,0
 
