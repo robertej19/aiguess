@@ -346,3 +346,6 @@ def remove_sky_band_distance(
     new_sky_mask[ys[keep_mask], xs[keep_mask]] = 1
 
     return new_sky_mask
+
+
+

@@ -297,6 +297,28 @@ def draw_parallel_lines(frame,sky_mask, slope, intercept, distance=10):
     print("Red line within sky_mask:", red_within_sky)
 
 
+
+
+    # Determine the direction and line to use
+    if blue_within_sky:
+        selected_line_start = (int(blue_x1), int(blue_y1))
+        selected_line_end = (int(blue_x2), int(blue_y2))
+        perpendicular_direction = (int(-100 * dy), int(100 * dx))  # Direction from blue line
+    elif red_within_sky:
+        selected_line_start = (int(red_x1), int(red_y1))
+        selected_line_end = (int(red_x2), int(red_y2))
+        perpendicular_direction = (int(100 * dy), int(-100 * dx))  # Direction from red line
+    else:
+        selected_line_start = None
+        selected_line_end = None
+
+    # Create the region mask
+    if selected_line_start and selected_line_end:
+        region_mask = create_one_sided_region_mask(sky_mask, selected_line_start, selected_line_end, perpendicular_direction)
+    else:
+        print("No line is within the sky_mask.")
+
+
     # Draw the original line (optional for reference)
     cv2.line(frame, (int(x1), int(y1)), (int(x2), int(y2)), (255, 255, 255), 1)
 
@@ -306,4 +328,36 @@ def draw_parallel_lines(frame,sky_mask, slope, intercept, distance=10):
     # Draw the red parallel line
     cv2.line(frame, (int(red_x1), int(red_y1)), (int(red_x2), int(red_y2)), (0, 0, 255), 2)
 
-    return frame
+    return frame, region_mask
+
+
+def create_one_sided_region_mask(sky_mask, line_start, line_end, perpendicular_direction):
+    # Create a blank mask with the same size as the sky_mask
+    region_mask = np.zeros_like(sky_mask, dtype=np.uint8)
+
+    # Define the perpendicular direction (dx, dy)
+    dx, dy = perpendicular_direction
+
+    # Extend the line to form a region
+    height, width = sky_mask.shape
+    if dx > 0:
+        # Extend to the right edge
+        extended_start = (width, int(line_start[1] + (width - line_start[0]) * (dy / dx)))
+        extended_end = (width, int(line_end[1] + (width - line_end[0]) * (dy / dx)))
+    else:
+        # Extend to the left edge
+        extended_start = (0, int(line_start[1] - line_start[0] * (dy / dx)))
+        extended_end = (0, int(line_end[1] - line_end[0] * (dy / dx)))
+
+    # Define the polygon points for the region
+    polygon_points = np.array([
+        [line_start, line_end, extended_end, extended_start]
+    ], dtype=np.int32)
+
+    # Fill the polygon on the mask
+    cv2.fillPoly(region_mask, polygon_points, 255)
+
+    # Combine the region mask with the sky mask
+    final_mask = cv2.bitwise_and(sky_mask, region_mask)
+
+    return final_mask
