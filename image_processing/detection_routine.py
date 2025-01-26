@@ -17,8 +17,22 @@ def find_birds(raw_frame):
     image = raw_frame#[400:1800, 1100:1500]
     scale_factor = 4
     sky_mask = detect_sky(raw_frame)
+
+
+
     downsampled_sky_mask = downsampler(sky_mask,scale_factor=scale_factor)
     
+    half = downsampled_sky_mask.shape[0] // 2
+    sum_top = np.sum(downsampled_sky_mask[:half, :])     # top half
+    sum_bottom = np.sum(downsampled_sky_mask[half:, :])  # bottom half
+
+    # If more sky is in the bottom, flip vertically
+    upside_down = False
+    if sum_bottom > sum_top:
+        upside_down = True
+        #output_image = cv2.flip(output_image, 0)  # 0 => flip vertically
+
+
     result = estimate_horizon_line_by_edges(downsampled_sky_mask)
 
     if result is None:
@@ -62,7 +76,13 @@ def find_birds(raw_frame):
     polygon_roi_mask = np.zeros((height, width), dtype=np.uint8)
     
     cv2.fillPoly(polygon_roi_mask, [roi_corners], 255)
-    polygon_roi_mask = create_line_roi_mask_vectorized(width, height, slope, .8*scale_factor*intercept, above=True)
+    if upside_down:
+        search_above = False
+        mask_factor = 1.2
+    else:
+        mask_factor = 0.8
+        search_above = True
+    polygon_roi_mask = create_line_roi_mask_vectorized(width, height, slope, mask_factor*scale_factor*intercept, above=search_above)
     masked_frame_sky_roi = cv2.bitwise_and(raw_frame, raw_frame, mask=polygon_roi_mask)
     
     #show_bgr(masked_frame_sky_roi)
@@ -108,9 +128,10 @@ def find_birds(raw_frame):
             cy = y
         
         # Draw bounding box and centroid on the original image
-        cv2.rectangle(base_image, (x, y), (x+w, y+h), (0, 255, 0), 4)
+        cv2.rectangle(base_image, (x, y), (x+w, y+h), (0, 0, 255), 8)
 
-        rectified_frame = rotate_and_center_horizon(base_image,slope,intercept*scale_factor)
+        to_rect = base_image.copy()
+        rectified_frame = rotate_and_center_horizon(to_rect,slope,intercept*scale_factor,upside_down=upside_down)
 
 
         #cv2.circle(roi, (cx, cy), 4, (0, 0, 255), -1)
