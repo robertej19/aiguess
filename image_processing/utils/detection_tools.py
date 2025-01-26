@@ -39,9 +39,6 @@ def detect_sky(image, do_morphology=True):
 
     return sky_mask
 
-
-
-
 def estimate_horizon_line_by_edges(image):
     edges = feature.canny(image.astype(float),sigma=1)
 
@@ -58,13 +55,12 @@ def estimate_horizon_line_by_edges(image):
             return slope,intercept
         else:
             return 0,image.shape[0]/2
-            
-
+           
 def rectify_horizon(image, slope, intercept):
     angle = np.degrees(np.arctan(slope))
     rotated_image = rotate(image,angle,resize=True,preserve_range=True)
     ri = rotated_image.astype(np.uint8)
-    ri = translate_vertical(ri,-1*intercept*s)
+    ri = translate_vertical(ri,-1*intercept)
     return ri
 
 def downsampler(image,scale_factor=2):
@@ -92,4 +88,23 @@ def translate_vertical(image, distance):
                     [0, 1, distance]])
     # Apply the affine transformation
     translated_image = cv2.warpAffine(image, M, (cols, rows))
-    return image
+    return 
+
+def create_line_roi_mask_vectorized(width, height, slope, intercept, above=True):
+    """
+    Create a mask for y = slope*x + intercept using NumPy vectorization.
+    If above=True => keep y < slope*x + intercept
+    """
+    # Create a grid of x,y coords
+    X, Y = np.meshgrid(np.arange(width), np.arange(height))
+
+    line_vals = slope*X + intercept
+    if above:
+        condition = (Y < line_vals)
+    else:
+        condition = (Y > line_vals)
+
+    mask = np.zeros((height, width), dtype=np.uint8)
+    mask[condition] = 255
+    return mask
+

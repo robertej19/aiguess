@@ -6,8 +6,8 @@ from sklearn.linear_model import LinearRegression
 from skimage.transform import rotate,warp
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
-from utils.common import annotate_image,show_bgr, annotate_truth
-from utils.gen import add_random_noise, add_dot_and_bounding_box
+from utils.common_tools import annotate_image,show_bgr, annotate_truth
+from utils.generation_tools import add_random_noise, add_dot_and_bounding_box
 
 
 def generate_sequence(

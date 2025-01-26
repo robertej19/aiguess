@@ -29,7 +29,7 @@ def annotate_image(frame, cx, cy, w, h):
     
     return frame
 
-def show_bgr(frame,w=20):
+def show_bgr(frame,w=5):
     plt.figure(figsize=(w,int(w/1.6)))
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     plt.imshow(frame_rgb)
@@ -113,3 +113,64 @@ def assemble_frames_to_video(input_dir, output_video_path, fps=15, frame_pattern
     video_writer.release()
     print(f"Video successfully saved to '{output_video_path}'.")
 
+def stack_videos(video1_path,
+                 video2_path,
+                 output_video_path):
+     
+    # Open video files
+    cap1 = cv2.VideoCapture(video1_path)
+    cap2 = cv2.VideoCapture(video2_path)
+
+    # Get properties of the first video
+    fps1 = int(cap1.get(cv2.CAP_PROP_FPS))
+    width1 = int(cap1.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height1 = int(cap1.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    # Get properties of the second video
+    fps2 = int(cap2.get(cv2.CAP_PROP_FPS))
+    width2 = int(cap2.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height2 = int(cap2.get(cv2.CAP_PROP_FRAME_HEIGHT))
+
+    # Ensure both videos have the same FPS (or choose one FPS as the standard)
+    fps = min(fps1, fps2)
+
+    # Determine the new width for resizing (use the smaller width)
+    new_width = min(width1, width2)
+
+    # Calculate aspect ratios and determine new heights
+    new_height1 = int(height1 * (new_width / width1))
+    new_height2 = int(height2 * (new_width / width2))
+
+    # Output video dimensions
+    output_height = new_height1 + new_height2
+    output_width = new_width
+
+    # Define the codec and create VideoWriter object
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # You can use 'XVID' or other codecs
+    out = cv2.VideoWriter(output_video_path, fourcc, fps, (output_width, output_height))
+
+    while True:
+        # Read frames from both videos
+        ret1, frame1 = cap1.read()
+        ret2, frame2 = cap2.read()
+
+        # Stop if either video ends
+        if not ret1 or not ret2:
+            break
+
+        # Resize frames to the new dimensions
+        frame1_resized = cv2.resize(frame1, (new_width, new_height1))
+        frame2_resized = cv2.resize(frame2, (new_width, new_height2))
+
+        # Stack the frames vertically
+        combined_frame = cv2.vconcat([frame1_resized, frame2_resized])
+
+        # Write the combined frame to the output video
+        out.write(combined_frame)
+
+    # Release resources
+    cap1.release()
+    cap2.release()
+    out.release()
+
+    print(f"Combined video saved at {output_video_path}")
