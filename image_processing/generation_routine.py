@@ -6,7 +6,7 @@ from sklearn.linear_model import LinearRegression
 from skimage.transform import rotate,warp
 
 sys.path.append(os.path.abspath(os.path.dirname(__file__)))
-from utils.common_tools import annotate_image,show_bgr, annotate_truth
+from utils.common_tools import annotate_image,show_bgr
 from utils.generation_tools import add_random_noise, add_dot_and_bounding_box
 
 
@@ -214,10 +214,10 @@ def generate_sequence(
         filename_box = os.path.join(output_dir_box, f"frame_{frame_number:03}_box.jpg")
         filename_pose = os.path.join(output_dir_pose, f"frame_{frame_number:03}_pose.jpg")
 
-        img_pose = annotate_truth(img_pose,yaw_deg,pitch_deg, zoom, dot_x_center,
-                                    dot_y_center,
-                                    dot_size)
+        text = f"Object: ({int(cx)}, {int(cy)}), {int(dot_size)} pixels wide | Camera: {int(yaw_deg)} Yaw, {int(pitch_deg)} Pitch, {zoom:.1f} Zoom"
 
+        img_pose = annotate_image(img_pose,text)
+        
 
         
         warped_dot = add_random_noise(warped_dot, noise_level=synth_noise_level)

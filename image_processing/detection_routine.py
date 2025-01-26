@@ -109,11 +109,14 @@ def find_birds(raw_frame):
         # Draw bounding box and centroid on the original image
         cv2.rectangle(base_image, (x, y), (x+w, y+h), (0, 255, 0), 4)
         #cv2.circle(roi, (cx, cy), 4, (0, 0, 255), -1)
-        annotate_image(base_image, cx, cy, w, h)
-    
+        text = f"Detected Centroid: ({cx}, {cy}), Size: {w}x{h} pixels"
+        annotate_image(base_image, text)
+
         return base_image, cx,cy,w,h
     else:
-        annotate_image(base_image, 0,0,0,0)
+        text = f"Detected Centroid: ({0}, {0}), Size: {0}x{0} pixels"
+
+        annotate_image(base_image,text)
         
         return base_image, 0,0,0,0
 
