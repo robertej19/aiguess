@@ -63,13 +63,6 @@ def find_birds(raw_frame):
     #show_bgr(masked_frame_sky_roi)
     gray_frame = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2GRAY)
 
-    def show_gray(image, title=""):
-        """Helper function to display a grayscale image with matplotlib."""
-        plt.figure(figsize=(16, 14))
-        plt.imshow(image, cmap="gray")
-        plt.title(title)
-        plt.axis('off')
-        plt.show()
 
     # Read an image (can be color or already grayscale)
     input_image = raw_frame.copy()

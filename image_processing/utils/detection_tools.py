@@ -108,36 +108,18 @@ def create_line_roi_mask_vectorized(width, height, slope, intercept, above=True)
     mask[condition] = 255
     return mask
 
-def rotate_and_center_horizon(image, slope, intercept, upside_down=0):
+import cv2
+import numpy as np
+
+def rotate_and_center_horizon(image, slope, intercept, upside_down=False):
     """
-    Rotate 'image' so that the line y = slope*x + intercept becomes horizontal
-    and is both horizontally and vertically centered in a fixed-size output canvas.
-    If the frame is upside down, flip it so that the sky is at the top.
-
-    The output canvas is a square of side = 2 * max(W, H).
-
-    Parameters
-    ----------
-    image : np.ndarray
-        Input image of shape (H, W).
-    slope : float
-        Slope (m) of horizon line in the original image (y = m*x + b).
-    intercept : float
-        Intercept (b) of the horizon line in the original image.
-    upside_down : int
-        If 1, flips the final image vertically to ensure the sky is at the top.
-
-    Returns
-    -------
-    output_image : np.ndarray
-        Rotated/translated image in a canvas of size:
-          (2 * max(W, H), 2 * max(W, H)).
-        The horizon line is horizontal and centered vertically and horizontally.
-        If upside_down=1, the output is flipped vertically.
+    Rotate so the horizon becomes level (0 degrees).
+    Vertically pin the horizon pivot at the canvas center,
+    and center the entire image horizontally.
     """
     # 1) Dimensions of input
     H, W = image.shape[:2]
-    big_side = 2 * max(W, H)  # final canvas dimension for both width and height
+    big_side = 2 * max(W, H)  # final canvas dimension (square)
 
     # 2) Compute the rotation angle to flatten the horizon
     angle_radians = -np.arctan(slope)
@@ -145,41 +127,59 @@ def rotate_and_center_horizon(image, slope, intercept, upside_down=0):
     sin_a = np.sin(angle_radians)
 
     # 3) Choose pivot on the horizon at x = W/2
+    #    (so that after rotation the horizon is leveled
+    #    and we can place this pivot vertically at the center)
     pivot_x = W / 2.0
     pivot_y = slope * pivot_x + intercept
 
     # 4) Build 3x3 rotation-around-pivot matrix
     M_rot = np.array([
-        [ cos_a, -sin_a,  pivot_x - pivot_x*cos_a + pivot_y*sin_a],
-        [ sin_a,  cos_a,  pivot_y - pivot_x*sin_a - pivot_y*cos_a],
-        [     0,      0,                                 1       ]
+        [cos_a, -sin_a, pivot_x - pivot_x*cos_a + pivot_y*sin_a],
+        [sin_a,  cos_a, pivot_y - pivot_x*sin_a - pivot_y*cos_a],
+        [0,      0,     1]
     ], dtype=np.float32)
 
-    # 5) Find pivot location AFTER rotation
+    # -- Compute locations of the image's corners after rotation --
+    corners = np.array([
+        [0,   0, 1],
+        [W,   0, 1],
+        [W,   H, 1],
+        [0,   H, 1]
+    ], dtype=np.float32)
+    corners_rotated = (M_rot @ corners.T).T
+
+    # -- Find the bounding box of those rotated corners --
+    min_x = np.min(corners_rotated[:, 0])
+    max_x = np.max(corners_rotated[:, 0])
+    # Center of bounding box in the *rotated* space (horiz only)
+    center_x = 0.5 * (min_x + max_x)
+
+    # -- Pivot location after rotation (to pin vertically) --
     pivot_original = np.array([pivot_x, pivot_y, 1.0], dtype=np.float32)
     pivot_rotated = M_rot @ pivot_original
     pivot_rot_x, pivot_rot_y, _ = pivot_rotated
 
-    # 6) We want the pivot to be at the canvas center
+    # 5) We want:
+    #    - pivot_rot_y to end up at vertical center of final canvas
+    #    - bounding box center (center_x) to be at horizontal center
     canvas_cx = big_side / 2.0
     canvas_cy = big_side / 2.0
 
-    # Calculate translation offsets
-    tx = canvas_cx - pivot_rot_x
-    ty = canvas_cy - pivot_rot_y
+    tx = canvas_cx - center_x        # shift bounding box center to middle horizontally
+    ty = canvas_cy - pivot_rot_y     # shift pivot to middle vertically
 
     # Build translation matrix
     M_translate = np.array([
         [1, 0, tx],
         [0, 1, ty],
-        [0, 0, 1 ]
+        [0, 0, 1]
     ], dtype=np.float32)
 
-    # Combine the rotation + translation matrices
+    # 6) Combine rotation + translation matrices
     M_final = M_translate @ M_rot
     M_affine = M_final[:2, :]  # Extract the 2x3 affine transformation
 
-    # 7) Warp the image onto the big square
+    # 7) Warp the image onto the big canvas
     output_image = cv2.warpAffine(
         image,
         M_affine,
@@ -194,6 +194,8 @@ def rotate_and_center_horizon(image, slope, intercept, upside_down=0):
         output_image = cv2.flip(output_image, 0)  # 0 => flip vertically
 
     return output_image
+
+
 
 
 
