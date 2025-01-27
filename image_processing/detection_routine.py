@@ -58,7 +58,7 @@ def find_birds(raw_frame):
 
     double_line, region_mask =  draw_parallel_lines(raw_frame_x,sky_mask, slope, intercept* scale_factor, distance=50)
 
-    show_bgr(double_line)
+    #show_bgr(double_line)
 
     #show_bgr(masked_frame_sky_roi)
     gray_frame = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2GRAY)
@@ -91,7 +91,7 @@ def find_birds(raw_frame):
         C=4
     )
 
-    show_bgr(adaptive_thresh)
+    #show_bgr(adaptive_thresh)
     # Apply some Gaussian Blur
     gaussian_blur_ksize = (3, 3)
     gaussian_sigma = 0.5
@@ -110,7 +110,7 @@ def find_birds(raw_frame):
     # Restrict edges to sky ROI
     edges_in_sky_roi = cv2.bitwise_and(sobel_mask, region_mask)
 
-    show_bgr(edges_in_sky_roi)
+    #show_bgr(edges_in_sky_roi)
 
     contours, _ = cv2.findContours(edges_in_sky_roi, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     

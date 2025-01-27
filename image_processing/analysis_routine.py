@@ -1,4 +1,6 @@
 
+import pandas as pd
+import matplotlib.pyplot as plt
 
 # 1. Read in the data
 # Replace 'frame_data.txt' and 'processed_data.txt' with your actual file paths if needed
