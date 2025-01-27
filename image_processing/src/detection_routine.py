@@ -49,6 +49,7 @@ def find_birds(raw_frame,frame_number=None):
 
     double_line, region_mask, upside_down =  draw_parallel_lines(raw_frame_x,sky_mask, slope, intercept* scale_factor, distance=horizon_search_offset)
 
+    #show_bgr(region_mask, title="Region Mask {frame_number}")
     #show_bgr(double_line)
 
     #show_bgr(masked_frame_sky_roi)
@@ -91,16 +92,23 @@ def find_birds(raw_frame,frame_number=None):
     sobel_threshold = 50
     _, sobel_mask = cv2.threshold(sobel_abs, sobel_threshold, 255, cv2.THRESH_BINARY)
 
+
     # Restrict edges to sky ROI
     edges_in_sky_roi = cv2.bitwise_and(sobel_mask, region_mask)
+    #show_bgr(edges_in_sky_roi, title=f"Region Mask {frame_number}")
 
     #show_bgr(edges_in_sky_roi)
 
     contours, _ = cv2.findContours(edges_in_sky_roi, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
     if contours:
-        largest_contour = max(contours, key=cv2.contourArea)
+        # Filter contours to exclude those with an area larger than 400 pixels
+        filtered_contours = [contour for contour in contours if cv2.contourArea(contour) <= 400]
+
+    if filtered_contours:
+        # Find the largest remaining contour
+        largest_contour = max(filtered_contours, key=cv2.contourArea)
         x, y, w, h = cv2.boundingRect(largest_contour)
+        print(x,y,w,h)
         bounding_box = (x, y, w, h)
         
         # Centroid using image moments
@@ -117,7 +125,8 @@ def find_birds(raw_frame,frame_number=None):
             cy = y
         
         # Draw bounding box and centroid on the original image
-        cv2.rectangle(base_image, (x, y), (x+w, y+h), (0, 0, 255), 8)
+        cv2.rectangle(base_image, (x-2*w, y-2*h), (x+4*w, y+4*h), (0, 0, 255), 4)
+        #show_bgr(base_image, title=f"Contour Mask {frame_number}")
 
         to_rect = base_image.copy()
         rectified_frame = rotate_and_center_horizon(to_rect,slope,intercept*scale_factor,upside_down=upside_down)
@@ -128,7 +137,7 @@ def find_birds(raw_frame,frame_number=None):
             text = f"Frame: {frame_number} | Centroid: ({cx}, {cy}),{w}x{h} pixels"
         else:
             text = f"Centroid: ({cx}, {cy}),{w}x{h} pixels"
-        annotate_image(base_image, text)
+        annotate_image(base_image, text,text_size=1.5)
         annotate_image(rectified_frame, text)
 
 
@@ -139,7 +148,7 @@ def find_birds(raw_frame,frame_number=None):
         else:
             text = f"Centroid: ({0}, {0}), Size: {0}x{0} pixels"
 
-        annotate_image(base_image,text)
+        annotate_image(base_image,text,text_size=1.5)
         rectified_frame = rotate_and_center_horizon(base_image,slope,intercept*scale_factor)
         annotate_image(rectified_frame, text)
 
