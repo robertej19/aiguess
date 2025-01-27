@@ -51,10 +51,13 @@ def estimate_horizon_line_by_edges(image):
         slope = model.coef_[0]
         intercept = model.intercept_
 
+        print("Model found: ",slope,intercept)
         if slope and intercept:
             return slope,intercept
         else:
             return 0,image.shape[0]/2
+        
+
            
 def rectify_horizon(image, slope, intercept):
     angle = np.degrees(np.arctan(slope))
@@ -69,47 +72,6 @@ def downsampler(image,scale_factor=2):
     nh = h//scale_factor
     downsampled_image = cv2.resize(image,(nw,nh),interpolation=cv2.INTER_NEAREST)
     return downsampled_image
-
-def translate_vertical(image, distance):
-    """
-    Translates the given image vertically by the specified distance.
-
-    Parameters:
-        image (numpy.ndarray): The input image.
-        distance (int): The number of pixels to move the image downwards.
-
-    Returns:
-        numpy.ndarray: The translated image.
-    """
-    rows, cols = image.shape[:2]
-    
-    # Define the translation matrix: no horizontal shift, vertical shift by 'distance' pixels
-    M = np.float32([[1, 0, 0],
-                    [0, 1, distance]])
-    # Apply the affine transformation
-    translated_image = cv2.warpAffine(image, M, (cols, rows))
-    return 
-
-def create_line_roi_mask_vectorized(width, height, slope, intercept, above=True):
-    """
-    Create a mask for y = slope*x + intercept using NumPy vectorization.
-    If above=True => keep y < slope*x + intercept
-    """
-    # Create a grid of x,y coords
-    X, Y = np.meshgrid(np.arange(width), np.arange(height))
-
-    line_vals = slope*X + intercept
-    if above:
-        condition = (Y < line_vals)
-    else:
-        condition = (Y > line_vals)
-
-    mask = np.zeros((height, width), dtype=np.uint8)
-    mask[condition] = 255
-    return mask
-
-import cv2
-import numpy as np
 
 def rotate_and_center_horizon(image, slope, intercept, upside_down=False):
     """
@@ -194,159 +156,3 @@ def rotate_and_center_horizon(image, slope, intercept, upside_down=False):
         output_image = cv2.flip(output_image, 0)  # 0 => flip vertically
 
     return output_image
-
-
-
-
-
-
-def remove_sky_band_morph(
-    sky_mask, 
-    slope, 
-    intercept, 
-    thickness=5, 
-    band_width=10
-):
-    """
-    Removes a band of sky near the horizon line using a morphological approach:
-    1) Draw a line mask for the horizon.
-    2) Dilate that line to 'band_width' so it covers a boundary region near the horizon.
-    3) Subtract that band from sky_mask.
-
-    Parameters
-    ----------
-    sky_mask : np.ndarray (H,W), dtype=uint8 or bool
-        Binary mask (1=sky, 0=not sky).
-    slope : float
-        Slope m in y = m*x + b.
-    intercept : float
-        Intercept b in y = m*x + b.
-    thickness : int
-        Thickness in pixels to draw the initial horizon line.
-    band_width : int
-        How wide (in pixels) of a band around the horizon line to remove.
-
-    Returns
-    -------
-    new_sky_mask : np.ndarray (H,W) 
-        Sky mask with a morphological band near the horizon removed.
-    """
-
-    # Ensure mask is 8-bit
-    sky_mask = sky_mask.astype(np.uint8)
-    H, W = sky_mask.shape[:2]
-
-    # 1) Draw horizon line in a separate mask
-    horizon_mask = np.zeros((H, W), dtype=np.uint8)
-
-    # We'll sample x from 0..W-1, compute y. If it's in [0..H-1], draw the line.
-    # For a more accurate line, we can do cv2.line with two endpoints:
-    #   x1=0, y1=int(b) and x2=W-1, y2=int(m*(W-1) + b).
-    # But let's do a param approach:
-    x1, y1 = 0, slope*0 + intercept
-    x2, y2 = W-1, slope*(W-1) + intercept
-
-    # Round and clamp
-    y1 = int(round(np.clip(y1, 0, H-1)))
-    y2 = int(round(np.clip(y2, 0, H-1)))
-
-    # Now draw the line
-    cv2.line(
-        horizon_mask,
-        (0, y1),
-        (W-1, y2),
-        color=1,
-        thickness=thickness
-    )
-
-    # 2) Dilate that line to 'band_width'
-    # Create a kernel for dilation
-    kernel_size = (band_width, band_width)
-    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, kernel_size)
-    band_mask = cv2.dilate(horizon_mask, kernel, iterations=1)
-
-    # 3) Limit band_mask to where sky is 1. This is the boundary in the sky region.
-    band_sky = cv2.bitwise_and(band_mask, sky_mask)
-
-    # 4) Subtract band from the sky_mask => remove that boundary region
-    new_sky_mask = cv2.bitwise_and(sky_mask, cv2.bitwise_not(band_sky))
-
-    return new_sky_mask
-
-
-import numpy as np
-
-def remove_sky_band_distance(
-    sky_mask, 
-    slope, 
-    intercept, 
-    dist_threshold, 
-    reference_sky_pixel=None
-):
-    """
-    Removes sky pixels whose perpendicular distance to the horizon line
-    y = slope*x + intercept is < dist_threshold. This effectively shaves off
-    a band near the horizon, regardless of orientation.
-
-    Parameters
-    ----------
-    sky_mask : np.ndarray (H,W), dtype=uint8 or bool
-        Binary mask where sky_mask[y, x] = 1 indicates sky.
-    slope : float
-        Slope m in y = m*x + b.
-    intercept : float
-        Intercept b in y = m*x + b.
-    dist_threshold : float
-        Minimum distance from horizon line (in pixels) to keep. Anything closer is removed.
-    reference_sky_pixel : (x, y) tuple or None
-        A known sky pixel to determine which side of the line is sky.
-        If None, the function automatically finds one from sky_mask.
-
-    Returns
-    -------
-    new_sky_mask : np.ndarray (H,W)
-        A modified sky mask where the band near the horizon line has been removed.
-    """
-
-    H, W = sky_mask.shape[:2]
-    sky_mask = sky_mask.astype(np.uint8)  # ensure 0/1
-
-    # 1. If reference_sky_pixel not given, pick any pixel from sky_mask
-    if reference_sky_pixel is None:
-        coords = np.argwhere(sky_mask > 0)
-        if len(coords) == 0:
-            # No sky pixels, just return the original
-            return sky_mask
-        # Pick the first found sky pixel
-        ref_y, ref_x = coords[0]
-    else:
-        ref_x, ref_y = reference_sky_pixel
-
-    # 2. Compute sign for the reference sky pixel
-    #    The line is y = m*x + b => rearranging => m*x - y + b = 0
-    #    Signed distance sign: sign( m*ref_x - ref_y + b )
-    ref_val = slope * ref_x - ref_y + intercept
-    # If ref_val > 0 => sky is on the "positive side" of the line, else negative side
-    sky_side = 1 if ref_val > 0 else -1
-
-    # 3. Vectorized distance check
-    #    We'll gather all sky pixels, compute their signed distance
-    #    dist_signed = (m*x - y + b) / sqrt(m^2 + 1)
-    denom = np.sqrt(slope**2 + 1.0)
-    ys, xs = np.where(sky_mask == 1)
-    dist_signed = (slope * xs - ys + intercept) / denom
-
-    # Determine which pixels to keep
-    # Condition A: sign(dist_signed) == sky_side
-    # Condition B: abs(dist_signed) >= dist_threshold
-    # So we keep those that satisfy both
-    keep_mask = (np.sign(dist_signed) == sky_side) & (np.abs(dist_signed) >= dist_threshold)
-
-    # 4. Build the new sky mask
-    new_sky_mask = np.zeros_like(sky_mask, dtype=np.uint8)
-    new_sky_mask[ys[keep_mask], xs[keep_mask]] = 1
-
-    return new_sky_mask
-
-
-

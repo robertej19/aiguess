@@ -7,8 +7,8 @@ from skimage import feature
 from sklearn.linear_model import LinearRegression
 from skimage.transform import rotate,warp
 
-from utils.detection_tools import detect_sky, estimate_horizon_line_by_edges, create_line_roi_mask_vectorized
-from utils.detection_tools import rectify_horizon, downsampler, translate_vertical, rotate_and_center_horizon
+from utils.detection_tools import detect_sky, estimate_horizon_line_by_edges
+from utils.detection_tools import rectify_horizon, downsampler, rotate_and_center_horizon
 from utils.common_tools import annotate_image, show_bgr
 
 from utils.common_tools import find_nonzero_bounding_box, trim_video, draw_parallel_lines
@@ -22,17 +22,6 @@ def find_birds(raw_frame):
     scale_factor = 4
     downsampled_sky_mask = downsampler(sky_mask,scale_factor=scale_factor)
     
-    half = downsampled_sky_mask.shape[0] // 2
-    sum_top = np.sum(downsampled_sky_mask[:half, :])     # top half
-    sum_bottom = np.sum(downsampled_sky_mask[half:, :])  # bottom half
-
-    # If more sky is in the bottom, flip vertically
-    upside_down = False
-    if sum_bottom > sum_top:
-        upside_down = True
-        #output_image = cv2.flip(output_image, 0)  # 0 => flip vertically
-
-
     result = estimate_horizon_line_by_edges(downsampled_sky_mask)
 
     if result is None:
@@ -56,7 +45,7 @@ def find_birds(raw_frame):
     base_image_rgb = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2RGB)
     
 
-    double_line, region_mask =  draw_parallel_lines(raw_frame_x,sky_mask, slope, intercept* scale_factor, distance=50)
+    double_line, region_mask, upside_down =  draw_parallel_lines(raw_frame_x,sky_mask, slope, intercept* scale_factor, distance=50)
 
     #show_bgr(double_line)
 

@@ -247,39 +247,49 @@ def stack_videos(video1_path,
 
 
 
-def is_line_within_mask(sky_mask, line_start, line_end):
+def line_sky_coverage_ratio(sky_mask, line_start, line_end):
+    """
+    Returns the fraction of 'line_start -> line_end' 
+    that lies within sky_mask (0.0 to 1.0).
+    """
     # Create a blank mask with the same size as the sky_mask
     line_mask = np.zeros_like(sky_mask, dtype=np.uint8)
-
-    # Draw the line on the blank mask (white line)
+    
+    # Draw the line on the blank mask
     cv2.line(line_mask, line_start, line_end, 255, 1)
-
-    # Check overlap between the line_mask and the sky_mask
+    
+    # Overlap between the line_mask and sky_mask
     overlap = cv2.bitwise_and(sky_mask, line_mask)
+    
+    # Count how many pixels are in the line vs. how many of those are in sky
+    line_pixels = np.count_nonzero(line_mask)
+    overlap_pixels = np.count_nonzero(overlap)
+    
+    if line_pixels == 0:
+        return 0.0
+    else:
+        return overlap_pixels / line_pixels
 
-    # If any overlap exists, the line is within the mask
-    return np.any(overlap > 0)
-
-def draw_parallel_lines(frame,sky_mask, slope, intercept, distance=10):
+def draw_parallel_lines(frame, sky_mask, slope, intercept, distance=10):
     # Height and width of the frame
     height, width, _ = frame.shape
     
     # Compute direction vector (dx, dy) for the line
-    dx = 1
+    dx = 1.0
     dy = slope
     
     # Normalize the direction vector to unit length
-    length = np.sqrt(dx ** 2 + dy ** 2)
+    length = np.sqrt(dx**2 + dy**2)
     dx /= length
     dy /= length
     
     # Perpendicular vector (dy, -dx) scaled by distance
     perp_dx = -dy * distance
-    perp_dy = dx * distance
-
-    # Calculate original line endpoints
-    x1, y1 = 0, intercept
-    x2, y2 = width, slope * width + intercept
+    perp_dy =  dx * distance
+    
+    # Calculate the main line endpoints
+    x1, y1 = 0, intercept            # left edge
+    x2, y2 = width, slope*width+intercept  # right edge
     
     # Calculate parallel line endpoints
     blue_x1, blue_y1 = x1 + perp_dx, y1 + perp_dy
@@ -287,28 +297,31 @@ def draw_parallel_lines(frame,sky_mask, slope, intercept, distance=10):
     
     red_x1, red_y1 = x1 - perp_dx, y1 - perp_dy
     red_x2, red_y2 = x2 - perp_dx, y2 - perp_dy
-
-    # Check if the blue or red line is within the sky_mask
-    blue_within_sky = is_line_within_mask(sky_mask, (int(blue_x1), int(blue_y1)), (int(blue_x2), int(blue_y2)))
-    red_within_sky = is_line_within_mask(sky_mask, (int(red_x1), int(red_y1)), (int(red_x2), int(red_y2)))
-
-    # Display results
-    #print("Blue line within sky_mask:", blue_within_sky)
-    #print("Red line within sky_mask:", red_within_sky)
-
-
-
-
+    
+    # Convert endpoints to integer tuples
+    blue_start = (int(round(blue_x1)), int(round(blue_y1)))
+    blue_end   = (int(round(blue_x2)), int(round(blue_y2)))
+    red_start  = (int(round(red_x1)),  int(round(red_y1)))
+    red_end    = (int(round(red_x2)),  int(round(red_y2)))
+    
+    # Get coverage ratios for both parallel lines
+    blue_sky_ratio = line_sky_coverage_ratio(sky_mask, blue_start, blue_end)
+    red_sky_ratio  = line_sky_coverage_ratio(sky_mask, red_start, red_end)
+    print("Blue sky ratio:", blue_sky_ratio)
+    print("Red sky ratio:", red_sky_ratio)
+    upside_down = True
     # Determine the direction and line to use
-    if blue_within_sky:
+    if blue_sky_ratio > red_sky_ratio:
         selected_line_start = (int(blue_x1), int(blue_y1))
         selected_line_end = (int(blue_x2), int(blue_y2))
         perpendicular_direction = (int(-150 * dy), int(150 * dx))  # Direction from blue line
-    elif red_within_sky:
+    elif red_sky_ratio > blue_sky_ratio:
         selected_line_start = (int(red_x1), int(red_y1))
         selected_line_end = (int(red_x2), int(red_y2))
         perpendicular_direction = (int(150 * dy), int(-150 * dx))  # Direction from red line
+        upside_down = False
     else:
+        print("WARNING: Both lines have the same coverage ratio.")
         selected_line_start = None
         selected_line_end = None
 
@@ -328,7 +341,7 @@ def draw_parallel_lines(frame,sky_mask, slope, intercept, distance=10):
     # Draw the red parallel line
     cv2.line(frame, (int(red_x1), int(red_y1)), (int(red_x2), int(red_y2)), (0, 0, 255), 2)
 
-    return frame, region_mask
+    return frame, region_mask, upside_down
 
 
 def create_one_sided_region_mask(sky_mask, line_start, line_end, perpendicular_direction):
