@@ -307,8 +307,7 @@ def draw_parallel_lines(frame, sky_mask, slope, intercept, distance=10):
     # Get coverage ratios for both parallel lines
     blue_sky_ratio = line_sky_coverage_ratio(sky_mask, blue_start, blue_end)
     red_sky_ratio  = line_sky_coverage_ratio(sky_mask, red_start, red_end)
-    print("Blue sky ratio:", blue_sky_ratio)
-    print("Red sky ratio:", red_sky_ratio)
+
     upside_down = True
     # Determine the direction and line to use
     if blue_sky_ratio > red_sky_ratio:

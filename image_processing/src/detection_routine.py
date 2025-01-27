@@ -14,23 +14,26 @@ from utils.common_tools import annotate_image, show_bgr
 from utils.common_tools import find_nonzero_bounding_box, trim_video, draw_parallel_lines
 
 
-def find_birds(raw_frame):
+def find_birds(raw_frame,frame_number=None):
     base_image = raw_frame.copy()
-    sky_mask = detect_sky(raw_frame)
+    blurred_raw_frame = cv2.GaussianBlur(base_image, (125, 125), 125)
+    sky_mask = detect_sky(blurred_raw_frame)
 
 
-    scale_factor = 4
-    downsampled_sky_mask = downsampler(sky_mask,scale_factor=scale_factor)
+    scale_factor = 1
     
-    result = estimate_horizon_line_by_edges(downsampled_sky_mask)
+    horizon_result = estimate_horizon_line_by_edges(sky_mask)
 
-    if result is None:
-        #raise ValueError("estimate_horizon_line_by_edges() returned None. Check the input or the function logic.")
-        slope,intercept = 0, downsampled_sky_mask.shape[0]/2
+    if horizon_result is None:
+        # Fallback if horizon detection fails
+        print("Warning: Horizon detection failed. Using default horizon.")
+        slope, intercept = 0, sky_mask.shape[0]
+        horizon_search_offset = 1
     else:
-        slope, intercept = result
+        slope, intercept = horizon_result
+        horizon_search_offset = 50
 
-    h,w = downsampled_sky_mask.shape
+    h,w = sky_mask.shape
     
     x_start, x_end = 0, w - 1
     y_start = int(slope * x_start + intercept)
@@ -38,14 +41,13 @@ def find_birds(raw_frame):
     #############################################
     ### SKY ROI CREATED
     ###########################################
-    cv2.line(downsampled_sky_mask, (x_start, y_start), (x_end, y_end), (0, 0, 255), 1)
+    cv2.line(base_image, (x_start, y_start), (x_end, y_end), (0, 0, 255), 1)
     
     raw_frame_x = raw_frame.copy()
     cv2.line(raw_frame, (x_start*scale_factor, y_start*scale_factor), (x_end*scale_factor, y_end*scale_factor), (0, 0, 255), 5)
-    base_image_rgb = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2RGB)
     
 
-    double_line, region_mask, upside_down =  draw_parallel_lines(raw_frame_x,sky_mask, slope, intercept* scale_factor, distance=50)
+    double_line, region_mask, upside_down =  draw_parallel_lines(raw_frame_x,sky_mask, slope, intercept* scale_factor, distance=horizon_search_offset)
 
     #show_bgr(double_line)
 
@@ -122,14 +124,20 @@ def find_birds(raw_frame):
 
 
         #cv2.circle(roi, (cx, cy), 4, (0, 0, 255), -1)
-        text = f"Detected Centroid: ({cx}, {cy}), Size: {w}x{h} pixels"
+        if frame_number:
+            text = f"Frame: {frame_number} | Centroid: ({cx}, {cy}),{w}x{h} pixels"
+        else:
+            text = f"Centroid: ({cx}, {cy}),{w}x{h} pixels"
         annotate_image(base_image, text)
         annotate_image(rectified_frame, text)
 
 
         return rectified_frame,base_image, cx,cy,w,h
     else:
-        text = f"Detected Centroid: ({0}, {0}), Size: {0}x{0} pixels"
+        if frame_number:
+            text = f"Frame: {frame_number} | Centroid: ({0}, {0}), Size {0}x{0} pixels"
+        else:
+            text = f"Centroid: ({0}, {0}), Size: {0}x{0} pixels"
 
         annotate_image(base_image,text)
         rectified_frame = rotate_and_center_horizon(base_image,slope,intercept*scale_factor)
