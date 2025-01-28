@@ -15,15 +15,23 @@ from utils.common_tools import find_nonzero_bounding_box, trim_video, draw_paral
 
 
 def find_birds(raw_frame,frame_number=None):
+    
     base_image = raw_frame.copy()
-    blurred_raw_frame = cv2.GaussianBlur(base_image, (125, 125), 125)
-    sky_mask = detect_sky(blurred_raw_frame)
+
+    ## Detection is added by having an initial Gaussian blur
+    ## Check that this is actually used
+    base_image = cv2.GaussianBlur(base_image,(3,3),1)
+
+    very_blurred_base_image = cv2.GaussianBlur(base_image, (125, 125), 125)
+    sky_mask = detect_sky(very_blurred_base_image)
+
 
 
     scale_factor = 1
     
     horizon_result = estimate_horizon_line_by_edges(sky_mask)
 
+    #Need to handle edge case where slope = 1/0
     if horizon_result is None:
         # Fallback if horizon detection fails
         print("Warning: Horizon detection failed. Using default horizon.")
@@ -43,21 +51,21 @@ def find_birds(raw_frame,frame_number=None):
     ###########################################
     cv2.line(base_image, (x_start, y_start), (x_end, y_end), (0, 0, 255), 1)
     
-    raw_frame_x = raw_frame.copy()
-    cv2.line(raw_frame, (x_start*scale_factor, y_start*scale_factor), (x_end*scale_factor, y_end*scale_factor), (0, 0, 255), 5)
+    base_image_x = base_image.copy()
+    cv2.line(base_image, (x_start*scale_factor, y_start*scale_factor), (x_end*scale_factor, y_end*scale_factor), (0, 0, 255), 5)
     
 
-    double_line, region_mask, upside_down =  draw_parallel_lines(raw_frame_x,sky_mask, slope, intercept* scale_factor, distance=horizon_search_offset)
+    double_line, region_mask, upside_down =  draw_parallel_lines(base_image_x,sky_mask, slope, intercept* scale_factor, distance=horizon_search_offset)
 
     #show_bgr(region_mask, title="Region Mask {frame_number}")
     #show_bgr(double_line)
 
     #show_bgr(masked_frame_sky_roi)
-    gray_frame = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2GRAY)
+    gray_frame = cv2.cvtColor(base_image, cv2.COLOR_BGR2GRAY)
 
 
     # Read an image (can be color or already grayscale)
-    input_image = raw_frame.copy()
+    input_image = base_image.copy()
     # Convert to grayscale if needed
     gray = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
 
@@ -76,6 +84,27 @@ def find_birds(raw_frame,frame_number=None):
         C=4
     )
 
+    hsv_frame = raw_frame.copy()
+
+    hsv_frame_hsv =cv2.cvtColor(hsv_frame, cv2.COLOR_BGR2HSV)
+    hb = 110
+    sb = 128
+    vb = 255
+    ht = 130
+    st = 250
+    vt = 255
+    b = [hb,sb,vb]
+    t = [ht,st,vt]
+    lb = np.array(b, np.uint8)
+    ub = np.array(t, np.uint8)
+    hsv_mask = cv2.inRange(hsv_frame_hsv, lb, ub)
+
+
+    
+    
+    
+    
+
     #show_bgr(adaptive_thresh)
     # Apply some Gaussian Blur
     gaussian_blur_ksize = (3, 3)
@@ -93,13 +122,17 @@ def find_birds(raw_frame,frame_number=None):
     _, sobel_mask = cv2.threshold(sobel_abs, sobel_threshold, 255, cv2.THRESH_BINARY)
 
 
+
     # Restrict edges to sky ROI
     edges_in_sky_roi = cv2.bitwise_and(sobel_mask, region_mask)
+    edges_in_sky_roi_with_hsv_mask = cv2.bitwise_and(edges_in_sky_roi,hsv_mask)
+
+
     #show_bgr(edges_in_sky_roi, title=f"Region Mask {frame_number}")
 
     #show_bgr(edges_in_sky_roi)
-
-    contours, _ = cv2.findContours(edges_in_sky_roi, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    filtered_contours = None
+    contours, _ = cv2.findContours(edges_in_sky_roi_with_hsv_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     if contours:
         # Filter contours to exclude those with an area larger than 400 pixels
         filtered_contours = [contour for contour in contours if cv2.contourArea(contour) <= 400]
