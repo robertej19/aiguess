@@ -102,9 +102,6 @@ def find_birds(raw_frame,frame_number=None):
 
     
     
-    
-    
-
     #show_bgr(adaptive_thresh)
     # Apply some Gaussian Blur
     gaussian_blur_ksize = (3, 3)
@@ -165,7 +162,6 @@ def find_birds(raw_frame,frame_number=None):
         rectified_frame = rotate_and_center_horizon(to_rect,slope,intercept*scale_factor,upside_down=upside_down)
 
 
-        #cv2.circle(roi, (cx, cy), 4, (0, 0, 255), -1)
         if frame_number:
             text = f"Frame: {frame_number} | Centroid: ({cx}, {cy}),{w}x{h} pixels"
         else:
