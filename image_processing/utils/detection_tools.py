@@ -51,7 +51,6 @@ def estimate_horizon_line_by_edges(image):
         slope = model.coef_[0]
         intercept = model.intercept_
 
-        print("Model found: ",slope,intercept)
         if slope and intercept:
             return slope,intercept
         else:

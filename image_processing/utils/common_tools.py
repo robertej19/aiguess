@@ -308,8 +308,6 @@ def draw_parallel_lines(frame, sky_mask, slope, intercept, distance=10):
     blue_sky_ratio = line_sky_coverage_ratio(sky_mask, blue_start, blue_end)
     red_sky_ratio  = line_sky_coverage_ratio(sky_mask, red_start, red_end)
 
-    print("Blue sky ratio:", blue_sky_ratio)
-    print("Red sky ratio:", red_sky_ratio)
     upside_down = True
     # Determine the direction and line to use
     if blue_sky_ratio > red_sky_ratio:
@@ -317,32 +315,22 @@ def draw_parallel_lines(frame, sky_mask, slope, intercept, distance=10):
         selected_line_end = (int(blue_x2), int(blue_y2))
         perpendicular_direction = (int(-150 * dy), int(150 * dx))  # Direction from blue line
     elif red_sky_ratio > blue_sky_ratio:
-        print("Red line selected.")
         selected_line_start = (int(red_x1), int(red_y1))
         selected_line_end = (int(red_x2), int(red_y2))
         perpendicular_direction = (int(150 * dy), int(-150 * dx))  # Direction from red line
         upside_down = False
     else:
-        print("WARNING: Both lines have the same coverage ratio.")
         selected_line_start = None
         selected_line_end = None
 
-    print(dx,dy)
-    print("perpendicular_direction:", perpendicular_direction)
-    print("upside_down:", upside_down)
-    print(intercept)
-    print(frame.shape[0])
     if intercept == frame.shape[0]:
-        print("Inverting direction")
         perpendicular_direction = (int(-150 * dy), int(150 * dx))  # Direction from red line
 
-        print("perpendicular_direction:", perpendicular_direction)
     # Create the region mask
     if selected_line_start and selected_line_end:
-        print("Region mask created.")
         region_mask = create_one_sided_region_mask(sky_mask, selected_line_start, selected_line_end, perpendicular_direction)
     else:
-        print("No line is within the sky_mask.")
+        print("WARNING: No line is within the sky_mask.")
 
 
     # Draw the original line (optional for reference)
