@@ -1,5 +1,8 @@
 # config.yaml
 
+#(108, 76, 188)
+#Upper Bound: (112, 107, 242)
+
 image_processing:
   hf_noise_gaussian_kernel: [3, 3]
   hf_noise_gaussian_sigma: 1
@@ -7,8 +10,12 @@ image_processing:
   sky_gaussian_kernel: [125, 125]
   sky_gaussian_sigma: 125
 
-  hsv_lower_bound: [0, 0, 0]    # (hb, sb, vb)
-  hsv_upper_bound: [180, 255, 255]  # (ht, st, vt)
+  #make maximal bounds - all  255
+  #hsv_lower_bound: [0, 0, 0]    
+  #hsv_upper_bound: [180, 255, 255] 
+  hsv_lower_bound: [100, 40, 133]    # (hb, sb, vb)
+  hsv_upper_bound: [170, 159, 255]  # (ht, st, vt)
+
 
   adaptive_threshold_max_value: 255
   adaptive_threshold_block_size: 5
@@ -20,6 +27,8 @@ image_processing:
   sobel_x_kernel: 3
   sobel_y_kernel: 3
   sobel_threshold: 50
+
+  object_area_threshold: 400
 
 # Example RL parameters (optional)
 rl:

@@ -32,6 +32,7 @@ class ImageProcessingParams:
         self.sobel_x_kernel = ip_config["sobel_x_kernel"]
         self.sobel_y_kernel = ip_config["sobel_y_kernel"]
         self.sobel_threshold = ip_config["sobel_threshold"]
+        self.object_area_threshold = ip_config["object_area_threshold"]
 
 
 
@@ -66,7 +67,7 @@ def find_birds(raw_frame,frame_number=None,debug=False,
     sobel_x_kernel = ip_params.sobel_x_kernel
     sobel_y_kernel = ip_params.sobel_y_kernel
     sobel_threshold = ip_params.sobel_threshold
-
+    object_area_threshold = ip_params.object_area_threshold
     if debug:
         show_bgr(raw_frame, title=f"Raw Frame {frame_number}",
                     w=debug_image_width)
@@ -218,7 +219,7 @@ def find_birds(raw_frame,frame_number=None,debug=False,
     contours, _ = cv2.findContours(edges_in_sky_roi_with_hsv_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     if contours:
         # Filter contours to exclude those with an area larger than 400 pixels
-        filtered_contours = [contour for contour in contours if cv2.contourArea(contour) <= 400]
+        filtered_contours = [contour for contour in contours if cv2.contourArea(contour) <= object_area_threshold]
 
 
     if filtered_contours:
@@ -247,10 +248,28 @@ def find_birds(raw_frame,frame_number=None,debug=False,
 
         #Zoom in on the object
         zoomed_in = ultra_raw_frame[y:y+h, x:x+w]
-        zoomer = zoomed_in.copy()
         if debug:
             show_bgr(zoomed_in, title=f"Zoomed In, Frame {frame_number}",
                      w=debug_image_width)
+            
+        hsv_frame = cv2.cvtColor(zoomed_in, cv2.COLOR_BGR2HSV)
+
+        # Split HSV channels
+        h, s, v = cv2.split(hsv_frame)
+
+        # Get min and max for each channel
+        min_h, max_h = np.min(h), np.max(h)
+        min_s, max_s = np.min(s), np.max(s)
+        min_v, max_v = np.min(v), np.max(v)
+
+        print(f"Min H: {min_h}, Max H: {max_h}")
+        print(f"Min S: {min_s}, Max S: {max_s}")
+        print(f"Min V: {min_v}, Max V: {max_v}")
+
+        #print it as lower and upper bounds
+        #formatted as   hsv_lower_bound: [0, 0, 0]    
+        print(f"hsv_lower_bound: [{min_h}, {min_s}, {min_v}]")
+        print(f"hsv_upper_bound: [{max_h}, {max_s}, {max_v}]")
     else:
         cx,cy,w,h = 0,0,0,0
     
