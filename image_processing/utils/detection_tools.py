@@ -155,3 +155,47 @@ def rotate_and_center_horizon(image, slope, intercept, upside_down=False):
         output_image = cv2.flip(output_image, 0)  # 0 => flip vertically
 
     return output_image
+
+def extract_object_and_background_masks(frame):
+    """
+    Given a frame with a single object and uniform background,
+    this function extracts binary masks for the object and background.
+
+    Args:
+        frame (numpy.ndarray): Input frame (BGR or grayscale).
+    
+    Returns:
+        object_mask (numpy.ndarray): Binary mask where object pixels are 1, background is 0.
+        background_mask (numpy.ndarray): Binary mask where background pixels are 1, object is 0.
+    """
+    # Convert to grayscale if needed
+    if len(frame.shape) == 3:
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+    else:
+        gray = frame.copy()
+    
+    # Apply Gaussian Blur to reduce noise
+    blurred = cv2.GaussianBlur(gray, (5, 5), 0)
+
+    # Apply Otsu's thresholding to separate object and background
+    _, binary = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+
+    # Find contours (external only)
+    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+    if not contours:
+        raise ValueError("No contours found! Check the image or adjust preprocessing steps.")
+
+    # Assume the largest contour corresponds to the object
+    largest_contour = max(contours, key=cv2.contourArea)
+
+    # Create empty masks
+    object_mask = np.zeros_like(gray, dtype=np.uint8)
+    background_mask = np.ones_like(gray, dtype=np.uint8) * 255
+
+    # Fill the object contour in the mask
+    cv2.drawContours(object_mask, [largest_contour], -1, (255), thickness=cv2.FILLED)
+    cv2.drawContours(background_mask, [largest_contour], -1, (0), thickness=cv2.FILLED)
+
+    return object_mask, background_mask
+

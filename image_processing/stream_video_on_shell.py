@@ -7,6 +7,8 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
+from utils.detection_tools import extract_object_and_background_masks
+
 #import select
 #import termios
 #import tty
@@ -230,8 +232,15 @@ def main():
 
 
 if __name__ == "__main__":
+
+    frame_of_interest = None
     frame_of_interest = main()
+    
     if frame_of_interest is not None:
+        # save frame of interest
+        cv2.imwrite("frame_of_interest.jpg", frame_of_interest)
+
+        
         # do something with the frame
         print("Frame of interest shape:", frame_of_interest.shape)
         cv2.imshow("Frame", frame_of_interest)
@@ -260,5 +269,22 @@ if __name__ == "__main__":
             enumerate_grid=True
         )
         print(ascii_text)
+    if frame_of_interest is None:
+        # load frame of interest
+        frame_of_interest = cv2.imread("frame_of_interest.jpg")
+
+    object_mask, background_mask = extract_object_and_background_masks(frame_of_interest)
+    cv2.imshow("Object Mask", object_mask)
+    cv2.imshow("Background Mask", background_mask)
+    key = cv2.waitKey(0)
+    cv2.destroyAllWindows()    
+    # Example usage:
+    # frame = cv2.imread("example.jpg")  # Load an image
+    # obj_mask, bg_mask = extract_object_and_background_masks(frame)
+    # cv2.imshow("Object Mask", obj_mask)
+    # cv2.imshow("Background Mask", bg_mask)
+    # cv2.waitKey(0)
+    # cv2.destroyAllWindows()
+
 
 
