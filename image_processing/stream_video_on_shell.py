@@ -54,11 +54,14 @@ def frame_to_ascii(frame, new_width=80, color=False, enumerate_grid=False):
     ascii_lines = []
     for i, row in enumerate(resized):
         line_chars = []
+        is_black_row = True
         for j, (r, g, b) in enumerate(row):
+            if (r, g, b) != (0, 0, 0):  # Check if the row contains non-black pixels
+                is_black_row = False
+            
             if enumerate_grid:
                 # Show row/col indices in top-left
                 if i < 3:
-                    # top 3 rows used to show column digits
                     if i == 0:
                         line_chars.append(str(j // 100))
                     elif i == 1:
@@ -66,24 +69,23 @@ def frame_to_ascii(frame, new_width=80, color=False, enumerate_grid=False):
                     else:
                         line_chars.append(str(j % 10))
                 elif j < 2:
-                    # left 2 columns used to show row digits
                     if j == 0:
                         line_chars.append(str(i // 10))
                     else:
                         line_chars.append(str(i % 10))
                 else:
-                    # normal pixel to ascii
                     if color:
                         line_chars.append(pixel_to_ascii_color(r, g, b))
                     else:
                         line_chars.append(pixel_to_ascii_bw(r, g, b, BW_ASCII_CHARS))
             else:
-                # normal ASCII
                 if color:
                     line_chars.append(pixel_to_ascii_color(r, g, b))
                 else:
                     line_chars.append(pixel_to_ascii_bw(r, g, b, BW_ASCII_CHARS))
-        ascii_lines.append("".join(line_chars))
+        
+        if not is_black_row:  # Skip entirely black rows
+            ascii_lines.append("".join(line_chars))
 
     ascii_text = "\n".join(ascii_lines)
     return ascii_text, resized.shape[:2]  # (height, width)
@@ -215,7 +217,7 @@ def main():
                         current_frame,
                         new_width=256,
                         color=True,
-                        enumerate_grid=True
+                        enumerate_grid=False
                     )
                     print(ascii_text)
                 else:
@@ -248,7 +250,7 @@ def main():
                         frame,
                         new_width=256,
                         color=True,
-                        enumerate_grid=True
+                        enumerate_grid=False
                     )
                     print(ascii_text)
                 #pause
