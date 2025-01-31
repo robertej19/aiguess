@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 
 from utils.detection_tools import extract_object_and_background_masks
 from utils.detection_tools import get_min_max_hsv
-from src.detection_routine import find_birds
+#from src.detection_routine import find_birds
 #import select
 #import termios
 #import tty
@@ -208,10 +208,32 @@ def main():
                     print("Invalid choice. Please type 's', 'n', 'p', or 'q'.")
             else:
                 os.system("cls" if os.name == "nt" else "clear")
-                rectified_frame,base_image, cx,cy,w,h, contour_mask = find_birds(current_frame)
+
+                hsv_lower_bound = [50,100 , 135]    # (hb, sb, vb)
+                hsv_upper_bound = [80, 225, 255]  # (ht, st, vt)
+
+                hsv_frame_hsv =cv2.cvtColor(current_frame, cv2.COLOR_BGR2HSV)
+
+                lb = np.array(hsv_lower_bound, np.uint8)
+                ub = np.array(hsv_upper_bound, np.uint8)
+                hsv_mask = cv2.inRange(hsv_frame_hsv, lb, ub)
+
+                contours, _ = cv2.findContours(hsv_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                if contours:
+                    # Find the largest remaining contour
+                    identified_object = max(contours, key=cv2.contourArea)
+                    x, y, w, h = cv2.boundingRect(identified_object)
+                    bounding_box = (x, y, w, h)
+    
+                #create an empty frame
+                frame = np.zeros_like(current_frame)
+                #draw the identified object
+                cv2.drawContours(frame, [identified_object], -1, (0, 255, 0), 2)
+                #put a red dot on the center
+                cv2.circle(frame, (int(x + w/2), int(y + h/2)), 3, (0, 0, 255), -1)
 
                 ascii_text, (ascii_h, ascii_w) = frame_to_ascii(
-                    contour_mask,
+                    frame,
                     new_width=256,
                     color=True,
                     enumerate_grid=True
