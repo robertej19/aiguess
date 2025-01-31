@@ -115,7 +115,7 @@ def main():
 
     frame_index = 5  # start at frame 5 for debugging, else 0
     play_continuously = False
-
+    playcounter = 30
     while True:
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
         ret, frame = cap.read()
@@ -209,39 +209,50 @@ def main():
             else:
                 os.system("cls" if os.name == "nt" else "clear")
 
-                hsv_lower_bound = [50,100 , 135]    # (hb, sb, vb)
-                hsv_upper_bound = [80, 225, 255]  # (ht, st, vt)
+                if playcounter > 0:
+                    playcounter -= 1
+                    ascii_text, (ascii_h, ascii_w) = frame_to_ascii(
+                        current_frame,
+                        new_width=256,
+                        color=True,
+                        enumerate_grid=True
+                    )
+                    print(ascii_text)
+                else:
 
-                hsv_frame_hsv =cv2.cvtColor(current_frame, cv2.COLOR_BGR2HSV)
+                    hsv_lower_bound = [50,100 , 135]    # (hb, sb, vb)
+                    hsv_upper_bound = [80, 225, 255]  # (ht, st, vt)
 
-                lb = np.array(hsv_lower_bound, np.uint8)
-                ub = np.array(hsv_upper_bound, np.uint8)
-                hsv_mask = cv2.inRange(hsv_frame_hsv, lb, ub)
+                    hsv_frame_hsv =cv2.cvtColor(current_frame, cv2.COLOR_BGR2HSV)
 
-                contours, _ = cv2.findContours(hsv_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-                frame = np.zeros_like(current_frame)
-                
-                if contours:
-                    # Find the largest remaining contour
-                    identified_object = max(contours, key=cv2.contourArea)
-                    x, y, w, h = cv2.boundingRect(identified_object)
-                    bounding_box = (x, y, w, h)
-    
-                    #create an empty frame
-                    #draw the identified object
-                    cv2.drawContours(frame, [identified_object], -1, (0, 255, 0), 2)
-                    #put a red dot on the center
-                    cv2.circle(frame, (int(x + w/2), int(y + h/2)), 3, (0, 0, 255), -1)
+                    lb = np.array(hsv_lower_bound, np.uint8)
+                    ub = np.array(hsv_upper_bound, np.uint8)
+                    hsv_mask = cv2.inRange(hsv_frame_hsv, lb, ub)
 
-                ascii_text, (ascii_h, ascii_w) = frame_to_ascii(
-                    frame,
-                    new_width=256,
-                    color=True,
-                    enumerate_grid=True
-                )
-                print(ascii_text)
+                    contours, _ = cv2.findContours(hsv_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                    frame = np.zeros_like(current_frame)
+                    
+                    if contours:
+                        # Find the largest remaining contour
+                        identified_object = max(contours, key=cv2.contourArea)
+                        x, y, w, h = cv2.boundingRect(identified_object)
+                        bounding_box = (x, y, w, h)
+        
+                        #create an empty frame
+                        #draw the identified object
+                        cv2.drawContours(frame, [identified_object], -1, (0, 255, 0), 2)
+                        #put a red dot on the center
+                        cv2.circle(frame, (int(x + w/2), int(y + h/2)), 3, (0, 0, 255), -1)
+
+                    ascii_text, (ascii_h, ascii_w) = frame_to_ascii(
+                        frame,
+                        new_width=256,
+                        color=True,
+                        enumerate_grid=True
+                    )
+                    print(ascii_text)
                 #pause
-                time.sleep(0.1)
+                time.sleep(0.05)
                 break
 
     cap.release()
