@@ -85,7 +85,9 @@ def frame_to_ascii(frame, new_width=80, color=False, enumerate_grid=False):
                     line_chars.append(pixel_to_ascii_bw(r, g, b, BW_ASCII_CHARS))
         
         if not is_black_row:  # Skip entirely black rows
-            ascii_lines.append("\n".join(line_chars))
+            ascii_lines.append("".join(line_chars))
+        else:
+            ascii_lines.append("\n")
 
     ascii_text = "\n".join(ascii_lines)
     return ascii_text, resized.shape[:2]  # (height, width)
