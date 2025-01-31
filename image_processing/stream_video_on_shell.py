@@ -219,18 +219,19 @@ def main():
                 hsv_mask = cv2.inRange(hsv_frame_hsv, lb, ub)
 
                 contours, _ = cv2.findContours(hsv_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                frame = np.zeros_like(current_frame)
+                
                 if contours:
                     # Find the largest remaining contour
                     identified_object = max(contours, key=cv2.contourArea)
                     x, y, w, h = cv2.boundingRect(identified_object)
                     bounding_box = (x, y, w, h)
     
-                #create an empty frame
-                frame = np.zeros_like(current_frame)
-                #draw the identified object
-                cv2.drawContours(frame, [identified_object], -1, (0, 255, 0), 2)
-                #put a red dot on the center
-                cv2.circle(frame, (int(x + w/2), int(y + h/2)), 3, (0, 0, 255), -1)
+                    #create an empty frame
+                    #draw the identified object
+                    cv2.drawContours(frame, [identified_object], -1, (0, 255, 0), 2)
+                    #put a red dot on the center
+                    cv2.circle(frame, (int(x + w/2), int(y + h/2)), 3, (0, 0, 255), -1)
 
                 ascii_text, (ascii_h, ascii_w) = frame_to_ascii(
                     frame,
@@ -251,7 +252,7 @@ def main():
 if __name__ == "__main__":
 
     frame_of_interest = None
-    #frame_of_interest = main()
+    frame_of_interest = main()
     
     if frame_of_interest is not None:
         # save frame of interest
@@ -281,7 +282,7 @@ if __name__ == "__main__":
         os.system("cls" if os.name == "nt" else "clear")
         ascii_text, (ascii_h, ascii_w) = frame_to_ascii(
             edges,
-            new_width=256,
+            new_width=128,
             color=True,
             enumerate_grid=True
         )
