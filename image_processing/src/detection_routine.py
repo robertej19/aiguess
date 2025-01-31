@@ -16,6 +16,49 @@ from utils.common_tools import annotate_image, show_bgr
 from utils.common_tools import find_nonzero_bounding_box, trim_video, draw_parallel_lines
 
 
+
+def get_min_max_hsv(frame, mask):
+    """
+    Given a BGR frame and a mask, return the min and max values of H, S, and V within the masked area.
+    """
+    # Convert BGR to HSV
+    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+
+    # Apply the mask
+    masked_hsv = cv2.bitwise_and(hsv_frame, hsv_frame, mask=mask)
+
+    # Extract only non-zero pixels
+    nonzero_pixels = masked_hsv[np.where(mask > 0)]
+
+
+    if nonzero_pixels.size == 0:
+        print("No non-zero pixels found in the masked area.")
+        return {"min_h": None, "max_h": None, "min_s": None, "max_s": None, "min_v": None, "max_v": None}
+
+    # Get min and max for each channel
+    min_h, max_h = np.min(nonzero_pixels[:, 0]), np.max(nonzero_pixels[:, 0])
+    min_s, max_s = np.min(nonzero_pixels[:, 1]), np.max(nonzero_pixels[:, 1])
+    min_v, max_v = np.min(nonzero_pixels[:, 2]), np.max(nonzero_pixels[:, 2])
+
+    # return as min max arrays
+    return {"min_h": min_h, "max_h": max_h, "min_s": min_s, "max_s": max_s, "min_v": min_v, "max_v": max_v}
+
+def extract_contour_region(frame, contour):
+    """
+    Extract and return only the pixels inside the given contour.
+    """
+    # Create a mask with the same size as the frame, initialized to zero (black)
+    mask = np.zeros(frame.shape[:2], dtype=np.uint8)
+    
+    # Fill the contour with white color in the mask
+    cv2.drawContours(mask, [contour], -1, 255, thickness=cv2.FILLED)
+    
+    # Use the mask to extract the region of interest from the frame
+    extracted_region = cv2.bitwise_and(frame, frame, mask=mask)
+    
+    return extracted_region, mask
+
+
 class ImageProcessingParams:
     def __init__(self, ip_config):
         self.hf_noise_gaussian_kernel = tuple(ip_config["hf_noise_gaussian_kernel"])
@@ -246,30 +289,25 @@ def find_birds(raw_frame,frame_number=None,debug=False,
         # Draw bounding box and centroid on the original image
         cv2.rectangle(base_image, (x-2*w, y-2*h), (x+4*w, y+4*h), (0, 0, 255), 4)
 
+        extracted, contour_mask = extract_contour_region(ultra_raw_frame, identified_object)
+        #{"min_h": min_h, "max_h": max_h, "min_s": min_s, "max_s": max_s, "min_v": min_v, "max_v": max_v}
+        hsv_values =  get_min_max_hsv(ultra_raw_frame, contour_mask)
+        print("HSV Values")
+        print(hsv_values)
+        #print(hsv_values)
+        # Draw the contour on the ultra raw frame
+        cv2.drawContours(ultra_raw_frame, [identified_object], -1, (0, 255, 0), 1)
         #Zoom in on the object
-        zoomed_in = ultra_raw_frame[y:y+h, x:x+w]
+
+        zoomed_in = ultra_raw_frame[y-2:y+h+2, x-2:x+w+2]
+
         if debug:
             show_bgr(zoomed_in, title=f"Zoomed In, Frame {frame_number}",
                      w=debug_image_width)
             
-        hsv_frame = cv2.cvtColor(zoomed_in, cv2.COLOR_BGR2HSV)
-
-        # Split HSV channels
-        h, s, v = cv2.split(hsv_frame)
-
-        # Get min and max for each channel
-        min_h, max_h = np.min(h), np.max(h)
-        min_s, max_s = np.min(s), np.max(s)
-        min_v, max_v = np.min(v), np.max(v)
-
-        print(f"Min H: {min_h}, Max H: {max_h}")
-        print(f"Min S: {min_s}, Max S: {max_s}")
-        print(f"Min V: {min_v}, Max V: {max_v}")
-
-        #print it as lower and upper bounds
-        #formatted as   hsv_lower_bound: [0, 0, 0]    
-        print(f"hsv_lower_bound: [{min_h}, {min_s}, {min_v}]")
-        print(f"hsv_upper_bound: [{max_h}, {max_s}, {max_v}]")
+            show_bgr(extracted, title=f"Extracted Region, Frame {frame_number}",
+                     w=debug_image_width)
+            
     else:
         cx,cy,w,h = 0,0,0,0
     

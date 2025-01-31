@@ -13,8 +13,9 @@ image_processing:
   #make maximal bounds - all  255
   #hsv_lower_bound: [0, 0, 0]    
   #hsv_upper_bound: [180, 255, 255] 
-  hsv_lower_bound: [100, 40, 133]    # (hb, sb, vb)
-  hsv_upper_bound: [170, 159, 255]  # (ht, st, vt)
+  #{'min_h': 108, 'max_h': 164, 'min_s': 58, 'max_s': 146, 'min_v': 155, 'max_v': 241}
+  hsv_lower_bound: [107, 57, 154]    # (hb, sb, vb)
+  hsv_upper_bound: [165, 147, 242]  # (ht, st, vt)
 
 
   adaptive_threshold_max_value: 255
