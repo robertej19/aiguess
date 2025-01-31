@@ -84,13 +84,71 @@ def frame_to_ascii(frame, new_width=80, color=False, enumerate_grid=False):
                 else:
                     line_chars.append(pixel_to_ascii_bw(r, g, b, BW_ASCII_CHARS))
         
-        if not is_black_row:  # Skip entirely black rows
-            ascii_lines.append("".join(line_chars))
+def frame_to_ascii(frame, new_width=80, color=False, enumerate_grid=False):
+    """
+    Convert a BGR frame to ASCII text lines. 
+    If enumerate_grid=True, we print row/col labels in the top-left corner:
+      - Top 3 rows show column digits (hundreds, tens, ones).
+      - Left 2 columns show row digits (tens, ones).
+    Returns:
+      ascii_text (str): The ASCII-art representation
+      (ascii_height, ascii_width): the shape of the ASCII image
+    """
+    # Convert BGR -> RGB
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    h, w, _ = rgb_frame.shape
+
+    # Compute new height based on aspect ratio
+    aspect_ratio = h / w
+    new_height = int(aspect_ratio * new_width * 0.5625)
+    if new_height < 1:
+        new_height = 1
+
+    # Resize
+    resized = cv2.resize(rgb_frame, (new_width, new_height))
+
+    ascii_lines = []
+    for i, row in enumerate(resized):
+        line_chars = []
+        is_black_row = True
+        for j, (r, g, b) in enumerate(row):
+            if (r, g, b) != (0, 0, 0):  # Check if the row contains non-black pixels
+                is_black_row = False
+            
+            if enumerate_grid:
+                # Show row/col indices in top-left
+                if i < 3:
+                    if i == 0:
+                        line_chars.append(str(j // 100))
+                    elif i == 1:
+                        line_chars.append(str((j % 100) // 10))
+                    else:
+                        line_chars.append(str(j % 10))
+                elif j < 2:
+                    if j == 0:
+                        line_chars.append(str(i // 10))
+                    else:
+                        line_chars.append(str(i % 10))
+                else:
+                    if color:
+                        line_chars.append(pixel_to_ascii_color(r, g, b))
+                    else:
+                        line_chars.append(pixel_to_ascii_bw(r, g, b, BW_ASCII_CHARS))
+            else:
+                if color:
+                    line_chars.append(pixel_to_ascii_color(r, g, b))
+                else:
+                    line_chars.append(pixel_to_ascii_bw(r, g, b, BW_ASCII_CHARS))
+        
+        if is_black_row:  # If row is entirely black, append an empty line
+            ascii_lines.append("")
         else:
-            ascii_lines.append("\n")
+            ascii_lines.append("".join(line_chars))
 
     ascii_text = "\n".join(ascii_lines)
     return ascii_text, resized.shape[:2]  # (height, width)
+
+
 
 
 def main():
