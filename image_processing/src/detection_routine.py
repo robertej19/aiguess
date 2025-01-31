@@ -15,48 +15,9 @@ from utils.common_tools import annotate_image, show_bgr
 
 from utils.common_tools import find_nonzero_bounding_box, trim_video, draw_parallel_lines
 
+from utils.detection_tools import extract_object_and_background_masks
+from utils.detection_tools import get_min_max_hsv, extract_contour_region
 
-
-def get_min_max_hsv(frame, mask):
-    """
-    Given a BGR frame and a mask, return the min and max values of H, S, and V within the masked area.
-    """
-    # Convert BGR to HSV
-    hsv_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
-
-    # Apply the mask
-    masked_hsv = cv2.bitwise_and(hsv_frame, hsv_frame, mask=mask)
-
-    # Extract only non-zero pixels
-    nonzero_pixels = masked_hsv[np.where(mask > 0)]
-
-
-    if nonzero_pixels.size == 0:
-        print("No non-zero pixels found in the masked area.")
-        return {"min_h": None, "max_h": None, "min_s": None, "max_s": None, "min_v": None, "max_v": None}
-
-    # Get min and max for each channel
-    min_h, max_h = np.min(nonzero_pixels[:, 0]), np.max(nonzero_pixels[:, 0])
-    min_s, max_s = np.min(nonzero_pixels[:, 1]), np.max(nonzero_pixels[:, 1])
-    min_v, max_v = np.min(nonzero_pixels[:, 2]), np.max(nonzero_pixels[:, 2])
-
-    # return as min max arrays
-    return {"min_h": min_h, "max_h": max_h, "min_s": min_s, "max_s": max_s, "min_v": min_v, "max_v": max_v}
-
-def extract_contour_region(frame, contour):
-    """
-    Extract and return only the pixels inside the given contour.
-    """
-    # Create a mask with the same size as the frame, initialized to zero (black)
-    mask = np.zeros(frame.shape[:2], dtype=np.uint8)
-    
-    # Fill the contour with white color in the mask
-    cv2.drawContours(mask, [contour], -1, 255, thickness=cv2.FILLED)
-    
-    # Use the mask to extract the region of interest from the frame
-    extracted_region = cv2.bitwise_and(frame, frame, mask=mask)
-    
-    return extracted_region, mask
 
 
 class ImageProcessingParams:
@@ -309,6 +270,7 @@ def find_birds(raw_frame,frame_number=None,debug=False,
                      w=debug_image_width)
             
     else:
+        contour_mask = None
         cx,cy,w,h = 0,0,0,0
     
     rectified_frame = rotate_and_center_horizon(base_image,slope,intercept,upside_down=upside_down)
@@ -328,5 +290,5 @@ def find_birds(raw_frame,frame_number=None,debug=False,
                  w=debug_image_width)
                  
 
-    return rectified_frame,base_image, cx,cy,w,h
+    return rectified_frame,base_image, cx,cy,w,h, contour_mask
 

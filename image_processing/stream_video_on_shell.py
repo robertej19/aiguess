@@ -8,7 +8,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from utils.detection_tools import extract_object_and_background_masks
-
+from utils.detection_tools import get_min_max_hsv
+from src.detection_routine import find_birds
 #import select
 #import termios
 #import tty
@@ -207,9 +208,10 @@ def main():
                     print("Invalid choice. Please type 's', 'n', 'p', or 'q'.")
             else:
                 os.system("cls" if os.name == "nt" else "clear")
-                edges = cv2.Canny(current_frame, 10, 20)
+                rectified_frame,base_image, cx,cy,w,h, contour_mask = find_birds(current_frame)
+
                 ascii_text, (ascii_h, ascii_w) = frame_to_ascii(
-                    current_frame,
+                    contour_mask,
                     new_width=256,
                     color=True,
                     enumerate_grid=True
@@ -227,7 +229,7 @@ def main():
 if __name__ == "__main__":
 
     frame_of_interest = None
-    frame_of_interest = main()
+    #frame_of_interest = main()
     
     if frame_of_interest is not None:
         # save frame of interest
@@ -271,6 +273,8 @@ if __name__ == "__main__":
     cv2.imshow("Background Mask", background_mask)
     key = cv2.waitKey(0)
     cv2.destroyAllWindows()    
+    output = get_min_max_hsv(frame_of_interest, object_mask)
+    print(output)
     # Example usage:
     # frame = cv2.imread("example.jpg")  # Load an image
     # obj_mask, bg_mask = extract_object_and_background_masks(frame)

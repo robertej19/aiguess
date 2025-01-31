@@ -14,8 +14,9 @@ image_processing:
   #hsv_lower_bound: [0, 0, 0]    
   #hsv_upper_bound: [180, 255, 255] 
   #{'min_h': 108, 'max_h': 164, 'min_s': 58, 'max_s': 146, 'min_v': 155, 'max_v': 241}
-  hsv_lower_bound: [107, 57, 154]    # (hb, sb, vb)
-  hsv_upper_bound: [165, 147, 242]  # (ht, st, vt)
+  hsv_lower_bound: [50,100 , 135]    # (hb, sb, vb)
+  hsv_upper_bound: [80, 225, 255]  # (ht, st, vt)
+  #{'min_h': 58, 'max_h': 77, 'min_s': 110, 'max_s': 215, 'min_v': 140, 'max_v': 255}
 
 
   adaptive_threshold_max_value: 255
@@ -29,7 +30,7 @@ image_processing:
   sobel_y_kernel: 3
   sobel_threshold: 50
 
-  object_area_threshold: 400
+  object_area_threshold: 40000
 
 # Example RL parameters (optional)
 rl:
