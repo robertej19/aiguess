@@ -133,12 +133,12 @@ def frame_to_ascii(frame, new_width=80, color=False, enumerate_grid=False):
                     if color:
                         line_chars.append(pixel_to_ascii_color(r, g, b))
                     else:
-                        line_chars.append(pixel_to_ascii_bw(r, g, b, BW_ASCII_CHARS))
+                        line_chars.append(pixel_to_ascii_bw(r, g, b, BW_ASCII_CHARS) if (r, g, b) != (0, 0, 0) else " ")
             else:
                 if color:
                     line_chars.append(pixel_to_ascii_color(r, g, b))
                 else:
-                    line_chars.append(pixel_to_ascii_bw(r, g, b, BW_ASCII_CHARS))
+                    line_chars.append(pixel_to_ascii_bw(r, g, b, BW_ASCII_CHARS) if (r, g, b) != (0, 0, 0) else " ")
         
         if is_black_row:  # If row is entirely black, append an empty line
             ascii_lines.append("")
