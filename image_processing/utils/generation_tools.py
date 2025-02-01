@@ -326,10 +326,10 @@ def generate_simple_video():
         # Draw the red dot on the frame
         #cv2.circle(frame, (x, y), radius, color, thickness)
         # Draw rectangle on the frame
-        cv2.rectangle(frame, (x, y), (x+radius, y+radius), color, thickness)
+        cv2.rectangle(frame, (x, y), (x+radius, y+radius), color2, thickness)
 
-        offset = 100
-        cv2.rectangle(frame, (x-offset, y-offset), (x-offset+radius, y-offset+radius), color2, thickness)
+        #offset = 100
+        #cv2.rectangle(frame, (x-offset, y-offset), (x-offset+radius, y-offset+radius), color2, thickness)
 
         
         # Write the frame to the video file
@@ -338,3 +338,7 @@ def generate_simple_video():
     # Release the video writer and cleanup
     out.release()
     print(f"Video saved as {video_filename}")
+
+# if name main run generate_simple_video
+if __name__ == "__main__":
+    generate_simple_video()

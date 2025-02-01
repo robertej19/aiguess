@@ -2,7 +2,6 @@ import cv2, os, math, glob
 import numpy as np
 import pandas as pd
 import sys
-import yaml
 
 import matplotlib.pyplot as plt
 from skimage import feature
@@ -18,44 +17,23 @@ from utils.common_tools import find_nonzero_bounding_box, trim_video, draw_paral
 from utils.detection_tools import extract_object_and_background_masks
 from utils.detection_tools import get_min_max_hsv, extract_contour_region
 
-
-class ImageProcessingParams:
-    def __init__(self, ip_config):
-        self.hf_noise_gaussian_kernel = tuple(ip_config["hf_noise_gaussian_kernel"])
-        self.hf_noise_gaussian_sigma  = ip_config["hf_noise_gaussian_sigma"]
-        self.sky_gaussian_kernel      = tuple(ip_config["sky_gaussian_kernel"])
-        self.sky_gaussian_sigma       = ip_config["sky_gaussian_sigma"]
-        self.hsv_lower_bound         = tuple(ip_config["hsv_lower_bound"])
-        self.hsv_upper_bound         = tuple(ip_config["hsv_upper_bound"])
-        self.adaptive_threshold_max_value = ip_config["adaptive_threshold_max_value"]
-        self.adaptive_threshold_blockSize  = ip_config["adaptive_threshold_block_size"]
-        self.adaptive_threshold_constant   = ip_config["adaptive_threshold_constant"]
-        self.sobel_pre_gaussian_kernel = tuple(ip_config["sobel_pre_gaussian_kernel"])
-        self.sobel_pre_gaussian_sigma  = ip_config["sobel_pre_gaussian_sigma"]
-        self.sobel_x_kernel = ip_config["sobel_x_kernel"]
-        self.sobel_y_kernel = ip_config["sobel_y_kernel"]
-        self.sobel_threshold = ip_config["sobel_threshold"]
-        self.object_area_threshold = ip_config["object_area_threshold"]
+from src.config import ImageProcessingParams
 
 
 
-def find_birds(raw_frame,frame_number=None,debug=False,
-    debug_image_width = 14):#ip_params=None):
+def detect_objects(raw_frame,frame_number=None,debug=False,
+                   ip_params = None,
+    debug_image_width = 14):
+
+    # if pass a frame with no context, assume there is 1 easy to detect object in the frame, and write to yaml
+
     ultra_raw_frame = raw_frame.copy()
 
-    # 1) Load config
-    with open("config.yaml", 'r') as f:
-        config = yaml.safe_load(f)
-
-    # 2) Create an ImageProcessingParams instance
-    ip_params = ImageProcessingParams(config["image_processing"])
-
-    """ip_params is an instance of ImageProcessingParams."""
     if ip_params is None:
-        # fallback to defaults, or raise an error
-        raise ValueError("ip_params is required for find_birds.")
+        print("Warning: No ImageProcessingParams object was passed. Using default values.")
+        ip_params = ImageProcessingParams(None)
+    
 
-    # Use ip_params just like normal attributes
     hf_noise_gaussian_kernel = ip_params.hf_noise_gaussian_kernel
     hf_noise_gaussian_sigma  = ip_params.hf_noise_gaussian_sigma
     sky_gaussian_kernel      = ip_params.sky_gaussian_kernel
@@ -71,6 +49,7 @@ def find_birds(raw_frame,frame_number=None,debug=False,
     sobel_y_kernel = ip_params.sobel_y_kernel
     sobel_threshold = ip_params.sobel_threshold
     object_area_threshold = ip_params.object_area_threshold
+
     if debug:
         show_bgr(raw_frame, title=f"Raw Frame {frame_number}",
                     w=debug_image_width)
@@ -138,7 +117,6 @@ def find_birds(raw_frame,frame_number=None,debug=False,
     
 
     double_line, region_mask, upside_down =  draw_parallel_lines(base_image_x,sky_mask, slope, intercept, distance=horizon_search_offset)
-
     if debug:
         show_bgr(region_mask, title=f"Region Mask, Frame {frame_number}",
                  w=debug_image_width)

@@ -243,62 +243,7 @@ def stack_videos(video1_path,
     print(f"Combined video saved at {output_video_path}")
 
 
-# Convert a pixel to ASCII (black-and-white)
-def pixel_to_ascii_bw(r, g, b):
-    # Default ASCII chars for black-and-white
-    ascii_chars = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", "."]
-    # Simplified color ASCII chars (all '#')
-    # Convert to brightness
-    # Numbers chosen just because work well
-    brightness = 0.2126 * r + 0.7152 * g + 0.0722 * b 
-    index = int((brightness / 255) * (len(ascii_chars) - 1))
-    return ascii_chars[index]
 
-############################
-# Helper: Convert a pixel to ASCII with color (ANSI)
-############################
-def pixel_to_ascii_color(r, g, b):
-    # For color mode, we ignore brightness-based variation.
-    # We'll always use '#', tinted by the pixel's color.
-    # ASCII_CHARS is just a repeated '#' for bigger blocks.
-    ansi_char = '#'
-    # 24-bit color code: \033[38;2;R;G;Bm
-    return f"\033[38;2;{r};{g};{b}m{ansi_char}\033[0m"
-
-def frame_to_ascii(frame, new_width=80, color=False):
-    # Convert from BGR to RGB
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-    h, w, _ = rgb_frame.shape
-    aspect_ratio = h / w
-
-    # Approx correction factor for text aspect ratio
-    # This helps squares not look squashed vertically
-    new_height = int(aspect_ratio * new_width * 0.55)
-
-    # Resize the frame
-    resized = cv2.resize(rgb_frame, (new_width, new_height))
-
-    lines = []
-
-    if color:
-        # Use the repeated '#' array for blocky color.
-        for row in resized:
-            line_chars = []
-            for (r, g, b) in row:
-                line_chars.append(pixel_to_ascii_color(r, g, b))
-            lines.append("".join(line_chars))
-    else:
-        # Black-and-white ASCII
-        for row in resized:
-            line_chars = []
-            for (r, g, b) in row:
-                line_chars.append(pixel_to_ascii_bw(r, g, b))
-            lines.append("".join(line_chars))
-
-    # Join lines with newlines
-    ascii_frame = "\n".join(lines)
-    return ascii_frame
 
 
 def line_sky_coverage_ratio(sky_mask, line_start, line_end):
@@ -385,6 +330,8 @@ def draw_parallel_lines(frame, sky_mask, slope, intercept, distance=10):
         region_mask = create_one_sided_region_mask(sky_mask, selected_line_start, selected_line_end, perpendicular_direction)
     else:
         print("WARNING: No line is within the sky_mask.")
+        #make region be entire frame
+        region_mask = np.ones_like(sky_mask, dtype=np.uint8) * 255
 
 
     # Draw the original line (optional for reference)
