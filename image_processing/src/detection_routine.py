@@ -19,7 +19,6 @@ from utils.detection_tools import extract_object_and_background_masks
 from utils.detection_tools import get_min_max_hsv, extract_contour_region
 
 
-
 class ImageProcessingParams:
     def __init__(self, ip_config):
         self.hf_noise_gaussian_kernel = tuple(ip_config["hf_noise_gaussian_kernel"])

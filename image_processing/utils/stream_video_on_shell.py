@@ -1,77 +1,11 @@
 import cv2, os, time, shutil, sys
 import numpy as np
 
-# Default ASCII chars for black-and-white
-BW_ASCII_CHARS = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", "."]
-# Simplified color ASCII chars (all '#')
-COLOR_ASCII_CHARS = ["#"] * 11
+from utils.common_tools import frame_to_ascii
 
-############################
-# Helper: Convert a pixel to ASCII (black-and-white)
-############################
-def pixel_to_ascii_bw(r, g, b, ascii_chars):
-    # Convert to brightness
-    # Numbers chosen just because work well
-    brightness = 0.2126 * r + 0.7152 * g + 0.0722 * b 
-    index = int((brightness / 255) * (len(ascii_chars) - 1))
-    return ascii_chars[index]
-
-############################
-# Helper: Convert a pixel to ASCII with color (ANSI)
-############################
-def pixel_to_ascii_color(r, g, b):
-    # For color mode, we ignore brightness-based variation.
-    # We'll always use '#', tinted by the pixel's color.
-    # ASCII_CHARS is just a repeated '#' for bigger blocks.
-    ansi_char = '#'
-    # 24-bit color code: \033[38;2;R;G;Bm
-    return f"\033[38;2;{r};{g};{b}m{ansi_char}\033[0m"
-
-############################
-# Convert a frame to ASCII text lines
-############################
-def frame_to_ascii(frame, new_width=80, color=False):
-    # Convert from BGR to RGB
-    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-    h, w, _ = rgb_frame.shape
-    aspect_ratio = h / w
-
-    # Approx correction factor for text aspect ratio
-    # This helps squares not look squashed vertically
-    new_height = int(aspect_ratio * new_width * 0.55)
-
-    # Resize the frame
-    resized = cv2.resize(rgb_frame, (new_width, new_height))
-
-    lines = []
-
-    if color:
-        # Use the repeated '#' array for blocky color.
-        for row in resized:
-            line_chars = []
-            for (r, g, b) in row:
-                line_chars.append(pixel_to_ascii_color(r, g, b))
-            lines.append("".join(line_chars))
-    else:
-        # Black-and-white ASCII
-        for row in resized:
-            line_chars = []
-            for (r, g, b) in row:
-                line_chars.append(pixel_to_ascii_bw(r, g, b, BW_ASCII_CHARS))
-            lines.append("".join(line_chars))
-
-    # Join lines with newlines
-    ascii_frame = "\n".join(lines)
-    return ascii_frame
-
-
-############################
-# Main function
-############################
 def display_ascii_video(
     source=0,
-    use_color=False,
+    use_color=True,
     width=None,
     fps=10
 ):

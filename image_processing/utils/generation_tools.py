@@ -35,10 +35,6 @@ def add_random_noise(frame, noise_level=0.1):
 
     return noisy_frame
 
-
-import numpy as np
-import cv2
-
 def add_dot_and_bounding_box(
     image,
     object_size=10,
@@ -243,9 +239,6 @@ def add_dot_and_bounding_box_precisely_with_smear(image,
     return image_with_dot, image_with_box
 
 
-## Single Dot
-## No SMEARING
-## UNUSED
 def add_dot_and_bounding_box_precisely(image, x_center, y_center, object_size):
     # Create copies of the original image for both outputs
     image_with_dot = image.copy()
@@ -287,3 +280,61 @@ def add_dot_and_bounding_box_precisely(image, x_center, y_center, object_size):
     cv2.rectangle(image_with_box, top_left, bottom_right, box_color, box_thickness)
 
     return image_with_dot, image_with_box
+
+
+def generate_simple_video():
+    # Video properties
+    width, height = 1920, 1080
+    fps = 30
+    duration_seconds = 10
+    num_frames = fps * duration_seconds
+
+    # Define the video codec and create VideoWriter object
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # You can use other codecs like 'XVID'
+    video_filename = 'red_dot_video.mp4'
+    out = cv2.VideoWriter(video_filename, fourcc, fps, (width, height))
+
+    # Dot properties
+    radius = 50  # Radius in pixels (10 pixels in diameter)
+    color = (0, 0, 255)  # Red color in BGR format
+    color2 = (0, 255,0)  # Red color in BGR format
+
+    thickness = -1     # Filled circle
+
+    # Starting position (center of the frame) and velocity (pixels per frame)
+    x, y = width // 2, height // 2
+    dx, dy = 5, 3  # Change these values for different speeds
+
+    for frame_idx in range(num_frames):
+        # Create a black background
+        frame = np.zeros((height, width, 3), dtype=np.uint8)
+        
+        # Update position
+        x += dx
+        y += dy
+        
+        # Bounce off the left/right walls
+        if x - radius < 0 or x + radius > width:
+            dx = -dx
+            x += dx  # Adjust position after bouncing
+
+        # Bounce off the top/bottom walls
+        if y - radius < 0 or y + radius > height:
+            dy = -dy
+            y += dy  # Adjust position after bouncing
+
+        # Draw the red dot on the frame
+        #cv2.circle(frame, (x, y), radius, color, thickness)
+        # Draw rectangle on the frame
+        cv2.rectangle(frame, (x, y), (x+radius, y+radius), color, thickness)
+
+        offset = 100
+        cv2.rectangle(frame, (x-offset, y-offset), (x-offset+radius, y-offset+radius), color2, thickness)
+
+        
+        # Write the frame to the video file
+        out.write(frame)
+
+    # Release the video writer and cleanup
+    out.release()
+    print(f"Video saved as {video_filename}")
