@@ -326,7 +326,10 @@ def generate_simple_video():
         # Draw the red dot on the frame
         #cv2.circle(frame, (x, y), radius, color, thickness)
         # Draw rectangle on the frame
-        cv2.rectangle(frame, (x, y), (x+radius, y+radius), color2, thickness)
+        #add random noise to color
+        color = (0,0,255)
+        color = tuple([c + np.random.randint(-50,50) for c in color])
+        cv2.rectangle(frame, (x, y), (x+radius, y+radius), color, thickness)
 
         #offset = 100
         #cv2.rectangle(frame, (x-offset, y-offset), (x-offset+radius, y-offset+radius), color2, thickness)
