@@ -389,3 +389,118 @@ def create_one_sided_region_mask(sky_mask, line_start, line_end, perpendicular_d
     final_mask = cv2.bitwise_and(sky_mask, region_mask)
 
     return final_mask
+
+
+# Convert a pixel to ASCII (black-and-white)
+def pixel_to_ascii_bw(r, g, b):
+    # Default ASCII chars for black-and-white
+    ascii_chars = ["@", "#", "S", "%", "?", "*", "+", ";", ":", ",", "."]
+    # Simplified color ASCII chars (all '#')
+    # Convert to brightness
+    # Numbers chosen just because work well
+    brightness = 0.2126 * r + 0.7152 * g + 0.0722 * b 
+    index = int((brightness / 255) * (len(ascii_chars) - 1))
+    return ascii_chars[index]
+
+############################
+# Helper: Convert a pixel to ASCII with color (ANSI)
+############################
+def pixel_to_ascii_color(r, g, b):
+    # For color mode, we ignore brightness-based variation.
+    # We'll always use '#', tinted by the pixel's color.
+    # ASCII_CHARS is just a repeated '#' for bigger blocks.
+    ansi_char = '#'
+    # 24-bit color code: \033[38;2;R;G;Bm
+    return f"\033[38;2;{r};{g};{b}m{ansi_char}\033[0m"
+
+def frame_to_ascii(frame, new_width=80, color=False):
+    # Convert from BGR to RGB
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+    h, w, _ = rgb_frame.shape
+    aspect_ratio = h / w
+
+    # Approx correction factor for text aspect ratio
+    # This helps squares not look squashed vertically
+    new_height = int(aspect_ratio * new_width * 0.55)
+
+    # Resize the frame
+    resized = cv2.resize(rgb_frame, (new_width, new_height))
+
+    lines = []
+
+    if color:
+        # Use the repeated '#' array for blocky color.
+        for row in resized:
+            line_chars = []
+            for (r, g, b) in row:
+                line_chars.append(pixel_to_ascii_color(r, g, b))
+            lines.append("".join(line_chars))
+    else:
+        # Black-and-white ASCII
+        for row in resized:
+            line_chars = []
+            for (r, g, b) in row:
+                line_chars.append(pixel_to_ascii_bw(r, g, b))
+            lines.append("".join(line_chars))
+
+    # Join lines with newlines
+    ascii_frame = "\n".join(lines)
+    return ascii_frame
+
+
+def numbered_framing_from_ascii(frame, new_width=80, color=False, enumerate_grid=False):
+    """
+    Convert a BGR frame to ASCII text lines. 
+    If enumerate_grid=True, we print row/col labels in the top-left corner:
+      - Top 3 rows show column digits (hundreds, tens, ones).
+      - Left 2 columns show row digits (tens, ones).
+    Returns:
+      ascii_text (str): The ASCII-art representation
+      (ascii_height, ascii_width): the shape of the ASCII image
+    """
+    # Convert BGR -> RGB
+    rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+    h, w, _ = rgb_frame.shape
+
+    # Compute new height based on aspect ratio
+    aspect_ratio = h / w
+    new_height = int(aspect_ratio * new_width * 0.5625)
+    if new_height < 1:
+        new_height = 1
+
+    # Resize
+    resized = cv2.resize(rgb_frame, (new_width, new_height))
+
+    ascii_lines = []
+    for i, row in enumerate(resized):
+        line_chars = []
+        is_black_row = True
+        for j, (r, g, b) in enumerate(row):
+            if (r, g, b) != (0, 0, 0):  # Check if the row contains non-black pixels
+                is_black_row = False
+            
+            if enumerate_grid:
+                # Show row/col indices in top-left
+                if i < 3:
+                    if i == 0:
+                        line_chars.append(str(j // 100))
+                    elif i == 1:
+                        line_chars.append(str((j % 100) // 10))
+                    else:
+                        line_chars.append(str(j % 10))
+                elif j < 2:
+                    if j == 0:
+                        line_chars.append(str(i // 10))
+                    else:
+                        line_chars.append(str(i % 10))
+                else:
+                    if color:
+                        line_chars.append(pixel_to_ascii_color(r, g, b))
+                    else:
+                        line_chars.append(pixel_to_ascii_bw(r, g, b))
+            else:
+                if color:
+                    line_chars.append(pixel_to_ascii_color(r, g, b))
+                else:
+                    line_chars.append(pixel_to_ascii_bw(r, g, b))

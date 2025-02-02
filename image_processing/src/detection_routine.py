@@ -2,21 +2,20 @@ import cv2, os, math, glob
 import numpy as np
 import pandas as pd
 import sys
-
 import matplotlib.pyplot as plt
 from skimage import feature
 from sklearn.linear_model import LinearRegression
 from skimage.transform import rotate,warp
 
+
+
+from utils.detection_tools import extract_object_and_background_masks
 from utils.detection_tools import detect_sky, estimate_horizon_line_by_edges
 from utils.detection_tools import rectify_horizon, downsampler, rotate_and_center_horizon
 from utils.common_tools import annotate_image, show_bgr
-
 from utils.common_tools import find_nonzero_bounding_box, trim_video, draw_parallel_lines
 
-from utils.detection_tools import extract_object_and_background_masks
 from utils.detection_tools import get_min_max_hsv, extract_contour_region
-
 from src.config import ImageProcessingParams
 
 
