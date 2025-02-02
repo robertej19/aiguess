@@ -191,8 +191,6 @@ def detect_objects(raw_frame,frame_number=None,debug=False,
         show_bgr(edges_in_sky_roi_with_hsv_mask, title=f"Edges in Sky ROI with HSV, Frame {frame_number}",
                  w=debug_image_width)
 
-
-
     filtered_contours = None
     identified_object = None
 
@@ -200,7 +198,6 @@ def detect_objects(raw_frame,frame_number=None,debug=False,
     if contours:
         # Filter contours to exclude those with an area larger than 400 pixels
         filtered_contours = [contour for contour in contours if cv2.contourArea(contour) <= object_area_threshold]
-
 
     if filtered_contours:
         # Find the largest remaining contour

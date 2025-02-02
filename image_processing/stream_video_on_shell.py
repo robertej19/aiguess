@@ -95,14 +95,11 @@ if __name__ == "__main__":
     print("  width: ASCII width in chars (default: terminal width). Make this small to go faster")
     print("  fps: Frames per second (default: 30)")
 
-
-
     # Basic parse from sys.argv
     source = 0
     color_mode = True
     width = None
     fps = 30
-
 
     if len(sys.argv) > 1:
         source = sys.argv[1]

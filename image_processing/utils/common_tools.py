@@ -498,9 +498,18 @@ def numbered_framing_from_ascii(frame, new_width=80, color=False, enumerate_grid
                     if color:
                         line_chars.append(pixel_to_ascii_color(r, g, b))
                     else:
-                        line_chars.append(pixel_to_ascii_bw(r, g, b))
+                        line_chars.append(pixel_to_ascii_bw(r, g, b) if (r, g, b) != (0, 0, 0) else " ")
             else:
                 if color:
                     line_chars.append(pixel_to_ascii_color(r, g, b))
                 else:
-                    line_chars.append(pixel_to_ascii_bw(r, g, b))
+                    line_chars.append(pixel_to_ascii_bw(r, g, b) if (r, g, b) != (0, 0, 0) else " ")
+        
+        if is_black_row:  # If row is entirely black, append an empty line
+            ascii_lines.append("")
+        else:
+            ascii_lines.append("".join(line_chars))
+
+    ascii_text = "\n".join(ascii_lines)
+    return ascii_text, resized.shape[:2]  # (height, width)
+

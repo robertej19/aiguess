@@ -11,8 +11,6 @@ from utils.detection_tools import extract_object_and_background_masks
 from utils.detection_tools import get_min_max_hsv
 from utils.common_tools import numbered_framing_from_ascii
 
-
-
 def main():
     """
     Usage:
@@ -30,14 +28,14 @@ def main():
         sys.exit(1)
 
     video_path = sys.argv[1]
-    #cap = cv2.VideoCapture(video_path)
-    cap = cv2.VideoCapture(0) #use usb cam
+    cap = cv2.VideoCapture(video_path)
+    #cap = cv2.VideoCapture(0) #use usb cam
 
     if not cap.isOpened():
         print(f"Error: Cannot open video file '{video_path}'")
         sys.exit(1)
 
-    frame_index = 5  # start at frame 5 for debugging, else 0
+    frame_index = 0  # start at frame 5 for debugging, else 0
     play_continuously = False
     playcounter = 30
     while True:
@@ -187,12 +185,11 @@ def main():
 if __name__ == "__main__":
 
     frame_of_interest = None
-    #frame_of_interest = main()
+    frame_of_interest = main()
     
     if frame_of_interest is not None:
         # save frame of interest
         cv2.imwrite("frame_of_interest.jpg", frame_of_interest)
-
         
         # do something with the frame
         print("Frame of interest shape:", frame_of_interest.shape)
@@ -212,8 +209,6 @@ if __name__ == "__main__":
         key = cv2.waitKey(0)
         cv2.destroyAllWindows()
 
-
-
         os.system("cls" if os.name == "nt" else "clear")
         ascii_text, (ascii_h, ascii_w) = numbered_framing_from_ascii(
             edges,
@@ -222,6 +217,7 @@ if __name__ == "__main__":
             enumerate_grid=True
         )
         print(ascii_text)
+
     if frame_of_interest is None:
         # load frame of interest
         frame_of_interest = cv2.imread("frame_of_interest.jpg")

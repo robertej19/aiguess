@@ -241,3 +241,76 @@ def extract_contour_region(frame, contour):
     extracted_region = cv2.bitwise_and(frame, frame, mask=mask)
     
     return extracted_region, mask
+
+
+# ========================================================
+# Segmentation Routine (using k-means clustering)
+# ========================================================
+def segment_two_colors(frame, k=2):
+    """
+    Given a frame that has two dominant color regions, segment it using k-means clustering.
+    Assumes that one cluster is the object (smaller area) and the other is the background.
+    
+    Returns a dictionary with:
+      - object_mask, background_mask: binary masks for each region.
+      - object_color_lab, background_color_lab: cluster centers in LAB color space.
+      - object_color_bgr, background_color_bgr: cluster centers converted to BGR.
+      - object_area, background_area: pixel counts for each cluster.
+      - object_bbox: bounding box (x, y, w, h) for the object (largest contour in object mask).
+    """
+    # Convert image to LAB color space (LAB tends to be perceptually uniform)
+    lab_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+    
+    # Reshape into 2D array of pixels and convert to float32 for k-means.
+    pixel_values = lab_frame.reshape((-1, 3))
+    pixel_values = np.float32(pixel_values)
+    
+    # Define k-means criteria and run clustering.
+    criteria = (cv2.TERM_CRITERIA_EPS + cv2.TERM_CRITERIA_MAX_ITER, 10, 1.0)
+    attempts = 10
+    ret, labels, centers = cv2.kmeans(pixel_values, k, None, criteria, attempts, cv2.KMEANS_RANDOM_CENTERS)
+    
+    # Reshape labels back to the image shape.
+    labels = labels.flatten()
+    segmented_img = labels.reshape(frame.shape[:2])
+    
+    # Determine the area (pixel count) of each cluster.
+    unique, counts = np.unique(labels, return_counts=True)
+    cluster_areas = dict(zip(unique, counts))
+    
+    # Assume that the background is the cluster with more pixels.
+    background_index = max(cluster_areas, key=cluster_areas.get)
+    object_index     = min(cluster_areas, key=cluster_areas.get)
+    
+    # Create binary masks.
+    object_mask = np.uint8((segmented_img == object_index)) * 255
+    background_mask = np.uint8((segmented_img == background_index)) * 255
+    
+    # Retrieve the cluster centers (in LAB).
+    object_color_lab     = centers[object_index]
+    background_color_lab = centers[background_index]
+    
+    # Convert LAB centers to BGR for easier visualization.
+    object_color_bgr = cv2.cvtColor(np.uint8([[object_color_lab]]), cv2.COLOR_LAB2BGR)[0][0]
+    background_color_bgr = cv2.cvtColor(np.uint8([[background_color_lab]]), cv2.COLOR_LAB2BGR)[0][0]
+    
+    # Compute a bounding box for the object based on its mask.
+    contours, _ = cv2.findContours(object_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if contours:
+        largest_contour = max(contours, key=cv2.contourArea)
+        object_bbox = cv2.boundingRect(largest_contour)
+    else:
+        object_bbox = None
+    
+    result = {
+        'object_mask': object_mask,
+        'background_mask': background_mask,
+        'object_color_lab': object_color_lab,
+        'background_color_lab': background_color_lab,
+        'object_color_bgr': object_color_bgr,
+        'background_color_bgr': background_color_bgr,
+        'object_area': cluster_areas[object_index],
+        'background_area': cluster_areas[background_index],
+        'object_bbox': object_bbox
+    }
+    return result
