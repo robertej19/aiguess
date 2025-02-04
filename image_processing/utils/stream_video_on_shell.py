@@ -1,6 +1,7 @@
 import cv2, os, time, shutil, sys
 import numpy as np
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.common_tools import frame_to_ascii
 
 def display_ascii_video(

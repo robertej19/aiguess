@@ -8,6 +8,7 @@ from sklearn.linear_model import LinearRegression
 from skimage.transform import rotate,warp
 
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from utils.detection_tools import extract_object_and_background_masks
 from utils.detection_tools import detect_sky, estimate_horizon_line_by_edges

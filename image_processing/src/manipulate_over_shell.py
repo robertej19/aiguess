@@ -7,6 +7,8 @@ import sys
 import numpy as np
 import matplotlib.pyplot as plt
 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
 from utils.detection_tools import extract_object_and_background_masks
 from utils.detection_tools import get_min_max_hsv
 from utils.common_tools import numbered_framing_from_ascii
