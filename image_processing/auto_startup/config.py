@@ -13,12 +13,13 @@ class ImageProcessingParams:
 
             self.adaptive_threshold_max_value = 255
             self.adaptive_threshold_blockSize  = 5
-            self.adaptive_threshold_constant   = 5
+            self.adaptive_threshold_constant   = 4
             self.sobel_pre_gaussian_kernel = [3,3]
             self.sobel_pre_gaussian_sigma  = 0.5
             self.sobel_x_kernel = 3
             self.sobel_y_kernel = 3
             self.sobel_threshold = 50
+            self.lab_offset = 10
         else:
             self.hf_noise_gaussian_kernel = tuple(ip_config["hf_noise_gaussian_kernel"])
             self.hf_noise_gaussian_sigma  = ip_config["hf_noise_gaussian_sigma"]

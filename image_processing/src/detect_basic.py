@@ -21,13 +21,11 @@ from auto_startup.config import ImageProcessingParams
 
 
 
-def detect_basic(raw_frame,frame_number=None,debug=False,
+def detect_basic(frame_to_process,frame_number=None,debug=False,
                    ip_params = None,
     debug_image_width = 14):
-
+    raw_frame = frame_to_process.copy()
     # if pass a frame with no context, assume there is 1 easy to detect object in the frame, and write to yaml
-
-    ultra_raw_frame = raw_frame.copy()
 
     if ip_params is None:
         print("Warning: No ImageProcessingParams object was passed. Using default values.")
@@ -50,24 +48,22 @@ def detect_basic(raw_frame,frame_number=None,debug=False,
     sobel_threshold = ip_params.sobel_threshold
     object_area_threshold = ip_params.object_area_threshold
 
-    canny_threshold1 = 50
-    canny_threshold2 = 150
     if debug:
         show_bgr(raw_frame, title=f"Raw Frame {frame_number}",
                     w=debug_image_width)
         
-    base_image = raw_frame.copy()
-
  
-    input_image = base_image.copy()
-    # Convert to grayscale if needed
-    gray = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
+    gray_raw_frame = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2GRAY)
 
-    blurred_gray = cv2.GaussianBlur(gray, 
+    blurred_gray_frame = cv2.GaussianBlur(gray_raw_frame, 
                                         sobel_pre_gaussian_kernel, 
                                         sobel_pre_gaussian_sigma)
+    if debug:
+        show_bgr(blurred_gray_frame, title=f"Pre-Adaptive Threshold, Frame {frame_number}",
+                    w=debug_image_width)
+        
     adaptive_thresh = cv2.adaptiveThreshold(
-        blurred_gray,
+        blurred_gray_frame,
         maxValue=adaptive_threshold_max_value,
         adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         thresholdType=cv2.THRESH_BINARY,
@@ -77,7 +73,7 @@ def detect_basic(raw_frame,frame_number=None,debug=False,
 
 
     if debug:
-        show_bgr(adaptive_thresh, title=f"Pre-Sobel Blurred Gray, Frame {frame_number}",
+        show_bgr(adaptive_thresh, title=f"Adaptive Threshold, Frame {frame_number}",
                     w=debug_image_width)
 
 
@@ -130,17 +126,12 @@ def detect_basic(raw_frame,frame_number=None,debug=False,
             cx = x
             cy = y
         
-        # Draw bounding box and centroid on the original image
-        cv2.rectangle(base_image, (x-2*w, y-2*h), (x+4*w, y+4*h), (0, 0, 255), 4)
 
-        extracted, contour_mask = extract_contour_region(ultra_raw_frame, identified_object)
-        #{"min_h": min_h, "max_h": max_h, "min_s": min_s, "max_s": max_s, "min_v": min_v, "max_v": max_v}
-        hsv_values =  get_min_max_hsv(ultra_raw_frame, contour_mask)
-        print("HSV Values")
+
+        extracted, contour_mask = extract_contour_region(raw_frame, identified_object)
+        hsv_values =  get_min_max_hsv(raw_frame, contour_mask)
         print(hsv_values)
-        #print(hsv_values)
-        # Draw the contour on the ultra raw frame
-        cv2.drawContours(ultra_raw_frame, [identified_object], -1, (0, 255, 0), 1)
+
         #Zoom in on the object
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 
@@ -157,7 +148,7 @@ def detect_basic(raw_frame,frame_number=None,debug=False,
         if debug:
             show_bgr(output, title=f"Closed Contours, Frame {frame_number}",
                      w=debug_image_width)
-        zoomed_in = ultra_raw_frame[y-2:y+h+2, x-2:x+w+2]
+        zoomed_in = raw_frame[y-2:y+h+2, x-2:x+w+2]
 
         if debug:
             show_bgr(zoomed_in, title=f"Zoomed In, Frame {frame_number}",
@@ -166,6 +157,9 @@ def detect_basic(raw_frame,frame_number=None,debug=False,
             show_bgr(extracted, title=f"Extracted Region, Frame {frame_number}",
                      w=debug_image_width)
             
+        cv2.rectangle(raw_frame, (x-2*w, y-2*h), (x+4*w, y+4*h), (0, 0, 255), 4)
+        cv2.drawContours(raw_frame, [identified_object], -1, (0, 255, 0), 1)
+
     else:
         contour_mask = None
         identified_object = None
@@ -176,12 +170,12 @@ def detect_basic(raw_frame,frame_number=None,debug=False,
     else:
         text = f"Centroid: ({cx}, {cy}),{w}x{h} pixels"
 
-    annotate_image(base_image,text,text_size=1.5)
+    annotate_image(raw_frame,text,text_size=1.5)
 
     if debug:
-        show_bgr(base_image, title=f"Detected Object, Frame {frame_number}",
+        show_bgr(raw_frame, title=f"Detected Object, Frame {frame_number}",
                  w=debug_image_width)
                  
 
-    return base_image, cx,cy,w,h, contour_mask, identified_object
+    return raw_frame, cx,cy,w,h, contour_mask, identified_object
 

@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from skimage import feature
 from sklearn.linear_model import LinearRegression
 from skimage.transform import rotate,warp
+from itertools import product
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.common_tools import show_bgr
@@ -296,45 +297,96 @@ def get_min_max_lab_values(frame, mask):
     return min_vals, max_vals
 
 
-
-def create_wide_donut_mask2(frame,contour, padding_ratio=0.5 ):
-    """"
-    Create a wide donut mask around a given contour.
+def plot_min_max_lab_colors(min_vals, max_vals):
+    # Generate all combinations of min and max values for L, A, B
+    combinations = list(product(*zip(min_vals, max_vals)))
     
-    Parameters:
-        contour (numpy.ndarray): The contour to create the mask around.
-        padding_ratio (float): The percentage of the contour's width to use for padding.
-        img_shape (tuple): The shape of the image (height, width). If None, will use the size of the contour bounding box.
-        
-    Returns:
-        numpy.ndarray: A mask with a wide donut around the contour.
-    """
-    # Calculate the bounding box of the contour
-    x, y, contour_w, contour_h = cv2.boundingRect(contour)
-    print(x,y,contour_w,contour_h)
-    # If no image shape is provided, use the bounding box as the image size
+    # Normalize and clip Lab values to the 0-255 range
+    lab_colors = np.array(combinations, dtype=np.uint8)
 
-    # Get image_shape from frame
-    h, w = frame.shape[:2]
-    img_shape = (h, w)
+    # Convert the Lab values to RGB (or BGR) using OpenCV
+    bgr_colors = cv2.cvtColor(lab_colors.reshape(1, 8, 3), cv2.COLOR_LAB2RGB)
 
-    # Create a blank mask
-    mask = np.zeros(img_shape, dtype=np.uint8)
+    # Plot the 8 colors in a row
+    plt.figure(figsize=(18, 2))
+    plt.imshow(bgr_colors)
+    plt.axis('off')
+    plt.title(f"Min (L, A, B): {min_vals} | Max (L, A, B): {max_vals}")
+    plt.show()
 
-    # Expand the bounding box by the padding ratio
-    padding = int(contour_w * padding_ratio)
-    print(padding)
-    expanded_contour = np.array(contour) + [x - padding, y - padding]  # Expand contour
 
-    # Draw the expanded contour on the mask (this will be the "outer" part of the donut)
-    cv2.drawContours(mask, [expanded_contour], -1, 255, thickness=cv2.FILLED)
-    show_bgr(mask,w=20, title="Outer Mask")
-    # Draw the original contour on the mask (this will be the "inner" part of the donut)
-    inner_mask = np.zeros_like(mask)
-    cv2.drawContours(inner_mask, [contour], -1, 255, thickness=cv2.FILLED)
-    show_bgr(inner_mask,w=20, title="Inner Mask")   
-    # Subtract the inner region to create the donut shape
-    mask = mask - inner_mask
+
+def create_lab_range_mask(frame, min_vals, max_vals):
+    # Convert the frame to Lab color space
+    lab_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+    
+    # Create the mask using inRange, which checks each pixel's value within the min and max range for each channel
+    # make it be uin64
+    lower_bound = np.array(min_vals, dtype=np.uint64)
+    upper_bound = np.array(max_vals, dtype=np.uint64)
+    
+    # Apply the range threshold for L, A, and B channels
+    mask = cv2.inRange(lab_frame, lower_bound, upper_bound)
     
     return mask
 
+
+def create_donut_mask_with_exclusion(frame, contour,
+                                       outer_pad_ratio=0.5,
+                                       exclusion_pad_ratio=3.0):
+    """
+    Creates a "donut" mask from an input contour, where the donut is defined
+    as the region between an outer dilation of the contour and an inner
+    exclusion region that is the original object grown by an additional padding.
+    
+    The inner exclusion region will include the original contour plus extra padding.
+    For example, if the object's approximate width is 10 pixels and exclusion_pad_ratio
+    is 3.0, then the inner exclusion region will roughly be 10 + (10*3) = 40 pixels wide.
+    
+    Parameters:
+      frame              - Input image (only its size is used).
+      contour            - The contour (numpy array, as returned by cv2.findContours).
+      outer_pad_ratio    - The fraction of the contour bounding-box width to use
+                           for the outer dilation (default is 0.5, i.e. 50%).
+      exclusion_pad_ratio- The factor to multiply the bounding-box width by to get the
+                           extra exclusion padding. (For example, 3.0 means 300% extra.)
+    
+    Returns:
+      donut_mask         - A binary mask (np.uint8) where the donut region is 255 and
+                           all other areas are 0.
+    """
+    # Create an empty mask for the object (filled contour).
+    mask = np.zeros(frame.shape[:2], dtype=np.uint8)
+    filled = np.zeros_like(mask)
+    cv2.drawContours(filled, [contour], -1, 255, thickness=-1)
+    
+    # Compute the bounding rectangle of the contour.
+    x, y, w_box, h_box = cv2.boundingRect(contour)
+    
+    # Compute the padding amounts in pixels.
+    # Outer pad: used for the outer boundary of the donut.
+    outer_pad = int(w_box * outer_pad_ratio)
+    # Exclusion pad: extra padding to be added to the original object.
+    exclusion_pad = int(w_box * exclusion_pad_ratio)
+    
+    # --- Create Outer Mask ---
+    # We want a donut that is relatively wide. Here, we choose to dilate the original object
+    # by an amount corresponding to twice the outer_pad (this is arbitrary; adjust as needed).
+    outer_dilation_radius = 2 * outer_pad
+    outer_kernel_size = 2 * outer_dilation_radius + 1
+    outer_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,
+                                             (outer_kernel_size, outer_kernel_size))
+    outer_mask = cv2.dilate(filled, outer_kernel)
+    
+    # --- Create Inner Exclusion Mask ---
+    # This mask excludes the object itself plus extra padding.
+    inner_kernel_size = 2 * exclusion_pad + 1
+    inner_kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,
+                                             (inner_kernel_size, inner_kernel_size))
+    inner_exclusion = cv2.dilate(filled, inner_kernel)
+    
+    # --- Create the Donut Mask ---
+    # The donut is the region between the outer boundary and the inner exclusion region.
+    donut_mask = cv2.subtract(outer_mask, inner_exclusion)
+    
+    return donut_mask
