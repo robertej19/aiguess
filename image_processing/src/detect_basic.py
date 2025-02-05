@@ -63,8 +63,11 @@ def detect_basic(raw_frame,frame_number=None,debug=False,
     # Convert to grayscale if needed
     gray = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
 
+    blurred_gray = cv2.GaussianBlur(gray, 
+                                        sobel_pre_gaussian_kernel, 
+                                        sobel_pre_gaussian_sigma)
     adaptive_thresh = cv2.adaptiveThreshold(
-        gray,
+        blurred_gray,
         maxValue=adaptive_threshold_max_value,
         adaptiveMethod=cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
         thresholdType=cv2.THRESH_BINARY,
@@ -73,16 +76,14 @@ def detect_basic(raw_frame,frame_number=None,debug=False,
     )
 
 
-    blurred_gray = cv2.GaussianBlur(adaptive_thresh, 
-                                    sobel_pre_gaussian_kernel, 
-                                    sobel_pre_gaussian_sigma)
-
     if debug:
-        show_bgr(blurred_gray, title=f"Pre-Sobel Blurred Gray, Frame {frame_number}",w=14)
+        show_bgr(adaptive_thresh, title=f"Pre-Sobel Blurred Gray, Frame {frame_number}",
+                    w=debug_image_width)
+
 
     # Sobel
-    sobel_x = cv2.Sobel(blurred_gray, cv2.CV_64F, 1, 0, ksize=sobel_x_kernel)
-    sobel_y = cv2.Sobel(blurred_gray, cv2.CV_64F, 0, 1, ksize=sobel_y_kernel)
+    sobel_x = cv2.Sobel(adaptive_thresh, cv2.CV_64F, 1, 0, ksize=sobel_x_kernel)
+    sobel_y = cv2.Sobel(adaptive_thresh, cv2.CV_64F, 0, 1, ksize=sobel_y_kernel)
     sobel_mag = cv2.magnitude(sobel_x, sobel_y)
     sobel_abs = cv2.convertScaleAbs(sobel_mag)
 

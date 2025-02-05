@@ -13,7 +13,7 @@ class ImageProcessingParams:
 
             self.adaptive_threshold_max_value = 255
             self.adaptive_threshold_blockSize  = 5
-            self.adaptive_threshold_constant   = 4
+            self.adaptive_threshold_constant   = 5
             self.sobel_pre_gaussian_kernel = [3,3]
             self.sobel_pre_gaussian_sigma  = 0.5
             self.sobel_x_kernel = 3
