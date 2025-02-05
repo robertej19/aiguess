@@ -168,6 +168,7 @@ def detect_basic(raw_frame,frame_number=None,debug=False,
             
     else:
         contour_mask = None
+        identified_object = None
         cx,cy,w,h = 0,0,0,0
     
     if frame_number:
@@ -182,5 +183,5 @@ def detect_basic(raw_frame,frame_number=None,debug=False,
                  w=debug_image_width)
                  
 
-    return base_image, cx,cy,w,h, contour_mask
+    return base_image, cx,cy,w,h, contour_mask, identified_object
 

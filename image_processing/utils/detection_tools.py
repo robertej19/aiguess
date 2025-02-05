@@ -1,11 +1,12 @@
-import cv2, os, math, glob
+import cv2, os, math, glob, sys
 import numpy as np
 import matplotlib.pyplot as plt
 from skimage import feature
 from sklearn.linear_model import LinearRegression
 from skimage.transform import rotate,warp
 
-
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+from utils.common_tools import show_bgr
 
 def detect_sky(image, do_morphology=True):
     # Convert BGR to HSV
@@ -274,4 +275,66 @@ def frame_differencing(background, current_frame, diff_threshold=30):
     diff_thresh = cv2.dilate(diff_thresh, kernel, iterations=1)
     
     return diff_thresh
+
+def get_min_max_lab_values(frame, mask):
+    # Convert the frame to Lab color space
+    lab_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2LAB)
+    
+    # Apply the mask to the Lab image (only select pixels where the mask is true)
+    masked_lab = cv2.bitwise_and(lab_frame, lab_frame, mask=mask)
+    
+    # Reshape the masked frame to a 2D array (pixels x channels)
+    masked_lab_reshaped = masked_lab.reshape(-1, 3)
+    
+    # Mask out the pixels that are not selected by the mask (i.e., mask == 0)
+    masked_lab_reshaped = masked_lab_reshaped[np.all(masked_lab_reshaped != 0, axis=1)]
+    
+    # Calculate the min and max for each channel (L, A, B)
+    min_vals = np.min(masked_lab_reshaped, axis=0)
+    max_vals = np.max(masked_lab_reshaped, axis=0)
+    
+    return min_vals, max_vals
+
+
+
+def create_wide_donut_mask2(frame,contour, padding_ratio=0.5 ):
+    """"
+    Create a wide donut mask around a given contour.
+    
+    Parameters:
+        contour (numpy.ndarray): The contour to create the mask around.
+        padding_ratio (float): The percentage of the contour's width to use for padding.
+        img_shape (tuple): The shape of the image (height, width). If None, will use the size of the contour bounding box.
+        
+    Returns:
+        numpy.ndarray: A mask with a wide donut around the contour.
+    """
+    # Calculate the bounding box of the contour
+    x, y, contour_w, contour_h = cv2.boundingRect(contour)
+    print(x,y,contour_w,contour_h)
+    # If no image shape is provided, use the bounding box as the image size
+
+    # Get image_shape from frame
+    h, w = frame.shape[:2]
+    img_shape = (h, w)
+
+    # Create a blank mask
+    mask = np.zeros(img_shape, dtype=np.uint8)
+
+    # Expand the bounding box by the padding ratio
+    padding = int(contour_w * padding_ratio)
+    print(padding)
+    expanded_contour = np.array(contour) + [x - padding, y - padding]  # Expand contour
+
+    # Draw the expanded contour on the mask (this will be the "outer" part of the donut)
+    cv2.drawContours(mask, [expanded_contour], -1, 255, thickness=cv2.FILLED)
+    show_bgr(mask,w=20, title="Outer Mask")
+    # Draw the original contour on the mask (this will be the "inner" part of the donut)
+    inner_mask = np.zeros_like(mask)
+    cv2.drawContours(inner_mask, [contour], -1, 255, thickness=cv2.FILLED)
+    show_bgr(inner_mask,w=20, title="Inner Mask")   
+    # Subtract the inner region to create the donut shape
+    mask = mask - inner_mask
+    
+    return mask
 
