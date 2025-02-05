@@ -9,6 +9,8 @@ class ImageProcessingParams:
             self.sky_gaussian_sigma       = 125
             self.hsv_lower_bound         = [0, 0,0]
             self.hsv_upper_bound         = [180, 255, 255]
+            self.object_area_threshold = 400000000000 
+
             self.adaptive_threshold_max_value = 255
             self.adaptive_threshold_blockSize  = 5
             self.adaptive_threshold_constant   = 4
@@ -17,7 +19,6 @@ class ImageProcessingParams:
             self.sobel_x_kernel = 3
             self.sobel_y_kernel = 3
             self.sobel_threshold = 50
-            self.object_area_threshold = 400000000000 
         else:
             self.hf_noise_gaussian_kernel = tuple(ip_config["hf_noise_gaussian_kernel"])
             self.hf_noise_gaussian_sigma  = ip_config["hf_noise_gaussian_sigma"]

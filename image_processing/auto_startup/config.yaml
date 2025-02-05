@@ -10,17 +10,9 @@ image_processing:
   sky_gaussian_kernel: [125, 125]
   sky_gaussian_sigma: 125
 
-  #make maximal bounds - all  255
-  #hsv_lower_bound: [0, 0, 0]    
-  #hsv_upper_bound: [180, 255, 255] 
-  #{'min_h': 108, 'max_h': 164, 'min_s': 58, 'max_s': 146, 'min_v': 155, 'max_v': 241}
-  #hsv_lower_bound: [50,100 , 135]    # (hb, sb, vb)
-  #make maximal bounds - all  255
   hsv_lower_bound: [0, 10, 10]
   hsv_upper_bound: [180, 255, 255]
-  #hsv_upper_bound: [80, 225, 255]  # (ht, st, vt)
-  #{'min_h': 58, 'max_h': 77, 'min_s': 110, 'max_s': 215, 'min_v': 140, 'max_v': 255}
-
+  object_area_threshold: 40000
 
   adaptive_threshold_max_value: 255
   adaptive_threshold_block_size: 5
@@ -33,7 +25,6 @@ image_processing:
   sobel_y_kernel: 3
   sobel_threshold: 50
 
-  object_area_threshold: 40000
 
 # Example RL parameters (optional)
 rl:

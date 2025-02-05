@@ -21,7 +21,7 @@ from auto_startup.config import ImageProcessingParams
 
 
 
-def detect_objects(raw_frame,frame_number=None,debug=False,
+def detect_basic(raw_frame,frame_number=None,debug=False,
                    ip_params = None,
     debug_image_width = 14):
 
@@ -50,6 +50,8 @@ def detect_objects(raw_frame,frame_number=None,debug=False,
     sobel_threshold = ip_params.sobel_threshold
     object_area_threshold = ip_params.object_area_threshold
 
+    canny_threshold1 = 50
+    canny_threshold2 = 150
     if debug:
         show_bgr(raw_frame, title=f"Raw Frame {frame_number}",
                     w=debug_image_width)
@@ -57,75 +59,6 @@ def detect_objects(raw_frame,frame_number=None,debug=False,
     base_image = raw_frame.copy()
 
  
-
-    ## Detection is added by having an initial Gaussian blur
-    ## Check that this is actually used
-    base_image_small_blur = cv2.GaussianBlur(base_image,
-                                             hf_noise_gaussian_kernel,hf_noise_gaussian_sigma)
-
-    if debug:
-        show_bgr(base_image_small_blur, 
-                 title=f"Small Blurred, Frame {frame_number}",
-                 w=debug_image_width)
-        
-
-    very_blurred_base_image = cv2.GaussianBlur(base_image, 
-                                               sky_gaussian_kernel,
-                                               sky_gaussian_sigma)
-    
-    if debug:
-        show_bgr(very_blurred_base_image, 
-                 title=f"Very Blurred, Frame {frame_number}",
-                 w=debug_image_width)
-        
-    sky_mask = detect_sky(very_blurred_base_image)
-
-    if debug:
-        show_bgr(sky_mask, title=f"Sky Mask, Frame {frame_number}",
-                 w=debug_image_width)
-                 
-
-
-    horizon_result = estimate_horizon_line_by_edges(sky_mask)
-
-
-    #Need to handle edge case where slope = 1/0
-    if horizon_result is None:
-        # Fallback if horizon detection fails
-        print("Warning: Horizon detection failed. Using default horizon.")
-        slope, intercept = 0, sky_mask.shape[0]
-        horizon_search_offset = 1
-    else:
-        slope, intercept = horizon_result
-        horizon_search_offset = 50
-
-    h,w = sky_mask.shape
-    
-    x_start, x_end = 0, w - 1
-    y_start = int(slope * x_start + intercept)
-    y_end   = int(slope * x_end   + intercept)
-    #############################################
-    ### SKY ROI CREATED
-    ###########################################
-    base_image_with_horizion = cv2.line(base_image, (x_start, y_start), (x_end, y_end), (0, 0, 255), 2)
-    
-    if debug:
-        show_bgr(base_image_with_horizion, title=f"Horizon Line, Frame {frame_number}",
-                 w=debug_image_width)
-
-    base_image_x = base_image.copy()
-    
-
-    double_line, region_mask, upside_down =  draw_parallel_lines(base_image_x,sky_mask, slope, intercept, distance=horizon_search_offset)
-    if debug:
-        show_bgr(region_mask, title=f"Region Mask, Frame {frame_number}",
-                 w=debug_image_width)
-                 
-        show_bgr(double_line, title=f"Double Line, Frame {frame_number}",
-                 w=debug_image_width)
-                 
-
-    # Read an image (can be color or already grayscale)
     input_image = base_image.copy()
     # Convert to grayscale if needed
     gray = cv2.cvtColor(input_image, cv2.COLOR_BGR2GRAY)
@@ -138,18 +71,6 @@ def detect_objects(raw_frame,frame_number=None,debug=False,
         blockSize=adaptive_threshold_blockSize,
         C=adaptive_threshold_constant
     )
-
-    hsv_frame = raw_frame.copy()
-
-    hsv_frame_hsv =cv2.cvtColor(hsv_frame, cv2.COLOR_BGR2HSV)
-
-    lb = np.array(hsv_lower_bound, np.uint8)
-    ub = np.array(hsv_upper_bound, np.uint8)
-    hsv_mask = cv2.inRange(hsv_frame_hsv, lb, ub)
-
-    if debug:
-        show_bgr(hsv_mask, title=f"HSV Mask, Frame {frame_number}",w=14)
-        show_bgr(adaptive_thresh, title=f"Adaptive Threshold, Frame {frame_number}",w=14)
 
 
     blurred_gray = cv2.GaussianBlur(adaptive_thresh, 
@@ -170,32 +91,19 @@ def detect_objects(raw_frame,frame_number=None,debug=False,
                  w=debug_image_width)
 
     # Threshold
-    _, sobel_mask = cv2.threshold(sobel_abs, sobel_threshold, 
+    _, canny_edges = cv2.threshold(sobel_abs, sobel_threshold, 
                                   255, cv2.THRESH_BINARY)
 
-    if debug:
-        show_bgr(sobel_mask, title=f"Sobel Mask, Frame {frame_number}",
-                 w=debug_image_width)
-
-
-    # Restrict edges to sky ROI
-    edges_in_sky_roi = cv2.bitwise_and(sobel_mask, region_mask)
-    edges_in_sky_roi_with_hsv_mask = cv2.bitwise_and(edges_in_sky_roi,hsv_mask)
-
-        
-    if debug:
-        show_bgr(edges_in_sky_roi, title=f"Edges in Sky ROI, Frame {frame_number}",
-                 w=debug_image_width)
-
 
     if debug:
-        show_bgr(edges_in_sky_roi_with_hsv_mask, title=f"Edges in Sky ROI with HSV, Frame {frame_number}",
+        show_bgr(canny_edges, title=f"Edges in Frame, Frame {frame_number}",
                  w=debug_image_width)
+
 
     filtered_contours = None
     identified_object = None
 
-    contours, _ = cv2.findContours(edges_in_sky_roi_with_hsv_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(canny_edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
     if contours:
         # Filter contours to exclude those with an area larger than 400 pixels
         filtered_contours = [contour for contour in contours if cv2.contourArea(contour) <= object_area_threshold]
@@ -233,7 +141,21 @@ def detect_objects(raw_frame,frame_number=None,debug=False,
         # Draw the contour on the ultra raw frame
         cv2.drawContours(ultra_raw_frame, [identified_object], -1, (0, 255, 0), 1)
         #Zoom in on the object
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 
+        # Apply the closing operation.
+        closed = cv2.morphologyEx(canny_edges, cv2.MORPH_CLOSE, kernel)
+
+        # Optionally, find contours on the closed image:
+        contours, hierarchy = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+        # Draw the closed contour on a copy of the original image for visualization
+        output = cv2.cvtColor(canny_edges, cv2.COLOR_GRAY2BGR)
+        cv2.drawContours(output, contours, -1, (0, 255, 0), 2)
+
+        if debug:
+            show_bgr(output, title=f"Closed Contours, Frame {frame_number}",
+                     w=debug_image_width)
         zoomed_in = ultra_raw_frame[y-2:y+h+2, x-2:x+w+2]
 
         if debug:
@@ -247,22 +169,17 @@ def detect_objects(raw_frame,frame_number=None,debug=False,
         contour_mask = None
         cx,cy,w,h = 0,0,0,0
     
-    rectified_frame = rotate_and_center_horizon(base_image,slope,intercept,upside_down=upside_down)
-
     if frame_number:
         text = f"Frame: {frame_number} | Centroid: ({cx}, {cy}),{w}x{h} pixels"
     else:
         text = f"Centroid: ({cx}, {cy}),{w}x{h} pixels"
 
     annotate_image(base_image,text,text_size=1.5)
-    annotate_image(rectified_frame, text)
 
     if debug:
         show_bgr(base_image, title=f"Detected Object, Frame {frame_number}",
                  w=debug_image_width)
-        show_bgr(rectified_frame, title=f"Rectified Frame, Frame {frame_number}",
-                 w=debug_image_width)
                  
 
-    return rectified_frame,base_image, cx,cy,w,h, contour_mask
+    return base_image, cx,cy,w,h, contour_mask
 
