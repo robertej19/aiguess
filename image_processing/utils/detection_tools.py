@@ -287,8 +287,13 @@ def get_min_max_lab_values(frame, mask):
     # Reshape the masked frame to a 2D array (pixels x channels)
     masked_lab_reshaped = masked_lab.reshape(-1, 3)
     
-    # Mask out the pixels that are not selected by the mask (i.e., mask == 0)
+    # Mask out the pixels that are not selected by the mask (i.e., where all channels are 0)
     masked_lab_reshaped = masked_lab_reshaped[np.all(masked_lab_reshaped != 0, axis=1)]
+    
+    # Check if there are any valid pixels left
+    if masked_lab_reshaped.size == 0:
+        # Return default values or handle it as per your application's logic.
+        return None, None
     
     # Calculate the min and max for each channel (L, A, B)
     min_vals = np.min(masked_lab_reshaped, axis=0)
@@ -390,3 +395,34 @@ def create_donut_mask_with_exclusion(frame, contour,
     donut_mask = cv2.subtract(outer_mask, inner_exclusion)
     
     return donut_mask
+
+
+def expand_mask(relevant_region, kernel_size=5, operation='dilate'):
+    """
+    Expands the given mask to cover small pockets using a morphological operation.
+    
+    Parameters:
+      relevant_region : np.array
+          Binary mask (0 and 255) indicating the regions of interest.
+      kernel_size : int
+          Size of the structuring element (kernel). Increase to fill larger gaps.
+      operation : str
+          'dilate' for dilation or 'close' for morphological closing.
+    
+    Returns:
+      expanded_mask : np.array
+          The resulting mask after expansion.
+    """
+    # Create a structuring element (kernel); here we use an elliptical shape.
+    kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (kernel_size, kernel_size))
+    
+    if operation == 'dilate':
+        # Simple dilation: expands all the True regions in the mask.
+        expanded_mask = cv2.dilate(relevant_region, kernel, iterations=1)
+    elif operation == 'close':
+        # Morphological closing: dilation followed by erosion.
+        expanded_mask = cv2.morphologyEx(relevant_region, cv2.MORPH_CLOSE, kernel)
+    else:
+        raise ValueError("operation must be either 'dilate' or 'close'")
+    
+    return expanded_mask

@@ -18,26 +18,44 @@ from utils.common_tools import find_nonzero_bounding_box, trim_video, draw_paral
 
 from utils.detection_tools import get_min_max_hsv, extract_contour_region
 from auto_startup.config import ImageProcessingParams
+from utils.detection_tools import  plot_min_max_lab_colors, create_lab_range_mask, expand_mask
 
 
 
 def detect_basic(frame_to_process,frame_number=None,debug=False,
                    ip_params = None,
-    debug_image_width = 14):
+    debug_image_width = 14,
+    b_range = None,
+    o_range = None):
+    
     raw_frame = frame_to_process.copy()
+    frame_to_return = frame_to_process.copy()
+
+    if b_range is not None:
+        if o_range is not None:
+            # enable color processing
+            min_vals_extended = b_range[0]-10
+            max_vals_extended = b_range[0]+10
+            m_b = create_lab_range_mask(raw_frame, min_vals_extended, max_vals_extended)
+
+            big_b = expand_mask(m_b, kernel_size=5)
+
+
+            min_vals_extended = o_range[0]-30
+            max_vals_extended = o_range[1]+30
+            m_o= create_lab_range_mask(raw_frame, min_vals_extended, max_vals_extended)
+
+            combined_mask = cv2.bitwise_and(big_b, m_o)
+            #apply combined_mask to raw_frame
+            raw_frame = cv2.bitwise_and(raw_frame, raw_frame, mask=combined_mask)
+
+            
     # if pass a frame with no context, assume there is 1 easy to detect object in the frame, and write to yaml
 
     if ip_params is None:
-        print("Warning: No ImageProcessingParams object was passed. Using default values.")
+        #print("Warning: No ImageProcessingParams object was passed. Using default values.")
         ip_params = ImageProcessingParams(None)
     
-
-    hf_noise_gaussian_kernel = ip_params.hf_noise_gaussian_kernel
-    hf_noise_gaussian_sigma  = ip_params.hf_noise_gaussian_sigma
-    sky_gaussian_kernel      = ip_params.sky_gaussian_kernel
-    sky_gaussian_sigma       = ip_params.sky_gaussian_sigma
-    hsv_lower_bound          = ip_params.hsv_lower_bound
-    hsv_upper_bound          = ip_params.hsv_upper_bound
     adaptive_threshold_max_value = ip_params.adaptive_threshold_max_value
     adaptive_threshold_blockSize = ip_params.adaptive_threshold_blockSize
     adaptive_threshold_constant = ip_params.adaptive_threshold_constant
@@ -127,10 +145,7 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
             cy = y
         
 
-
         extracted, contour_mask = extract_contour_region(raw_frame, identified_object)
-        hsv_values =  get_min_max_hsv(raw_frame, contour_mask)
-        print(hsv_values)
 
         #Zoom in on the object
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
@@ -157,8 +172,8 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
             show_bgr(extracted, title=f"Extracted Region, Frame {frame_number}",
                      w=debug_image_width)
             
-        cv2.rectangle(raw_frame, (x-2*w, y-2*h), (x+4*w, y+4*h), (0, 0, 255), 4)
-        cv2.drawContours(raw_frame, [identified_object], -1, (0, 255, 0), 1)
+        cv2.rectangle(frame_to_return, (x-2*w, y-2*h), (x+4*w, y+4*h), (0, 0, 255), 4)
+        cv2.drawContours(frame_to_return, [identified_object], -1, (0, 255, 0), 1)
 
     else:
         contour_mask = None
@@ -170,12 +185,12 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
     else:
         text = f"Centroid: ({cx}, {cy}),{w}x{h} pixels"
 
-    annotate_image(raw_frame,text,text_size=1.5)
+    annotate_image(frame_to_return,text,text_size=1.5)
 
     if debug:
-        show_bgr(raw_frame, title=f"Detected Object, Frame {frame_number}",
+        show_bgr(frame_to_return, title=f"Detected Object, Frame {frame_number}",
                  w=debug_image_width)
                  
 
-    return raw_frame, cx,cy,w,h, contour_mask, identified_object
+    return frame_to_return, cx,cy,w,h, contour_mask, identified_object
 

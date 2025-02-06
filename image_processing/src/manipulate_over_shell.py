@@ -9,8 +9,8 @@ import matplotlib.pyplot as plt
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.detection_tools import extract_object_and_background_masks
-from utils.detection_tools import get_min_max_hsv
+from utils.detection_tools import get_min_max_lab_values, create_donut_mask_with_exclusion
+from src.detect_basic import detect_basic
 from utils.common_tools import numbered_framing_from_ascii
 
 def main():
@@ -39,7 +39,24 @@ def main():
 
     frame_index = 0  # start at frame 5 for debugging, else 0
     play_continuously = False
-    playcounter = 30
+    playcounter = 2
+    b_range = None
+    o_range = None
+    test_frame = cv2.imread('auto_startup/foi_2.png')
+    complete_frame, x,y,w,h, contour_mask, identified_object = detect_basic(test_frame,1,debug=False,
+                                                                            debug_image_width=20)
+
+    #shrink the contour mask by 1 pixel 
+    contour_mask = cv2.erode(contour_mask, np.ones((3,3), np.uint8), iterations=1)
+
+    background_mask = create_donut_mask_with_exclusion(test_frame, identified_object,
+                                        outer_pad_ratio=2,
+                                        exclusion_pad_ratio=1)
+
+    b_min, b_max = get_min_max_lab_values(test_frame, background_mask)
+    o_min, o_max = get_min_max_lab_values(test_frame, contour_mask)
+    b_range = (b_min, b_max)
+    o_range = (o_min, o_max)
     while True:
         cap.set(cv2.CAP_PROP_POS_FRAMES, frame_index)
         ret, frame = cap.read()
@@ -52,6 +69,7 @@ def main():
 
         current_frame = frame.copy()
         global_roi = (0, 0, frame.shape[0], frame.shape[1])
+
 
         while True:
             if not play_continuously:
@@ -73,9 +91,22 @@ def main():
                     return None
 
                 elif choice == 'd':
-                    cap.release()
-                    print("Quitting...")
-                    return current_frame
+                    
+                    
+                    complete_frame, x,y,w,h, contour_mask, identified_object = detect_basic(frame,1,debug=False,
+                                                                                            debug_image_width=20)
+
+                    contour_mask = cv2.erode(contour_mask, np.ones((3,3), np.uint8), iterations=1)
+
+                    background_mask = create_donut_mask_with_exclusion(frame, identified_object,
+                                                        outer_pad_ratio=2,
+                                                        exclusion_pad_ratio=1)
+
+                    b_min, b_max = get_min_max_lab_values(frame, background_mask)
+                    o_min, o_max = get_min_max_lab_values(frame, contour_mask)
+                    b_range = (b_min, b_max)
+                    o_range = (o_min, o_max)
+                    break
 
                 elif choice == 'n':
                     break
@@ -144,23 +175,15 @@ def main():
                     print(ascii_text)
                 else:
 
-                    hsv_lower_bound = [50,100 , 135]    # (hb, sb, vb)
-                    hsv_upper_bound = [80, 225, 255]  # (ht, st, vt)
-
-                    hsv_frame_hsv =cv2.cvtColor(current_frame, cv2.COLOR_BGR2HSV)
-
-                    lb = np.array(hsv_lower_bound, np.uint8)
-                    ub = np.array(hsv_upper_bound, np.uint8)
-                    hsv_mask = cv2.inRange(hsv_frame_hsv, lb, ub)
-
-                    contours, _ = cv2.findContours(hsv_mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+                    complete_frame, x,y,w,h, contour_mask, identified_object= detect_basic(current_frame,1,debug=False,
+                                                                                    debug_image_width=20,
+                                                                                    b_range = b_range,
+                                                                                    o_range = o_range)
+                    
+                    print(x,y)
                     frame = np.zeros_like(current_frame)
                     
-                    if contours:
-                        # Find the largest remaining contour
-                        identified_object = max(contours, key=cv2.contourArea)
-                        x, y, w, h = cv2.boundingRect(identified_object)
-                        bounding_box = (x, y, w, h)
+                    if identified_object is not None:
         
                         #create an empty frame
                         #draw the identified object
@@ -168,8 +191,11 @@ def main():
                         #put a red dot on the center
                         cv2.circle(frame, (int(x + w/2), int(y + h/2)), 3, (0, 0, 255), -1)
 
+                    cv2.circle(complete_frame, (int(x), int(y)), 10, (0, 0, 255), -1)
+                    
+
                     ascii_text, (ascii_h, ascii_w) = numbered_framing_from_ascii(
-                        frame,
+                        complete_frame,
                         new_width=256,
                         color=True,
                         enumerate_grid=False
@@ -185,56 +211,7 @@ def main():
 
 
 if __name__ == "__main__":
+    main()
 
-    frame_of_interest = None
-    frame_of_interest = main()
-    
-    if frame_of_interest is not None:
-        # save frame of interest
-        cv2.imwrite("frame_of_interest.jpg", frame_of_interest)
-        
-        # do something with the frame
-        print("Frame of interest shape:", frame_of_interest.shape)
-        cv2.imshow("Frame", frame_of_interest)
-        key = cv2.waitKey(0)
-        cv2.destroyAllWindows()
 
-        # apply gaussian blur
-        blurred = cv2.GaussianBlur(frame_of_interest, (3, 3), 0)
-        cv2.imshow("Blurred", blurred)
-        key = cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
-        # apply edge detection
-        edges = cv2.Canny(blurred, 100, 200)
-        cv2.imshow("Edges", edges)
-        key = cv2.waitKey(0)
-        cv2.destroyAllWindows()
-
-        os.system("cls" if os.name == "nt" else "clear")
-        ascii_text, (ascii_h, ascii_w) = numbered_framing_from_ascii(
-            edges,
-            new_width=128,
-            color=True,
-            enumerate_grid=True
-        )
-        print(ascii_text)
-
-    if frame_of_interest is None:
-        # load frame of interest
-        frame_of_interest = cv2.imread("frame_of_interest.jpg")
-
-    object_mask, background_mask = extract_object_and_background_masks(frame_of_interest)
-    cv2.imshow("Object Mask", object_mask)
-    cv2.imshow("Background Mask", background_mask)
-    key = cv2.waitKey(0)
-    cv2.destroyAllWindows()    
-    output = get_min_max_hsv(frame_of_interest, object_mask)
-    print(output)
-    # Example usage:
-    # frame = cv2.imread("example.jpg")  # Load an image
-    # obj_mask, bg_mask = extract_object_and_background_masks(frame)
-    # cv2.imshow("Object Mask", obj_mask)
-    # cv2.imshow("Background Mask", bg_mask)
-    # cv2.waitKey(0)
-    # cv2.destroyAllWindows()
+ 
