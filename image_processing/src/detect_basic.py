@@ -3,23 +3,11 @@ import numpy as np
 import pandas as pd
 import sys
 import matplotlib.pyplot as plt
-from skimage import feature
-from sklearn.linear_model import LinearRegression
-from skimage.transform import rotate,warp
-
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-from utils.detection_tools import extract_object_and_background_masks
-from utils.detection_tools import detect_sky, estimate_horizon_line_by_edges
-from utils.detection_tools import rectify_horizon, downsampler, rotate_and_center_horizon
 from utils.common_tools import annotate_image, show_bgr
-from utils.common_tools import find_nonzero_bounding_box, trim_video, draw_parallel_lines
-
-from utils.detection_tools import get_min_max_hsv, extract_contour_region
-from auto_startup.config import ImageProcessingParams
-from utils.detection_tools import  plot_min_max_lab_colors, create_lab_range_mask, expand_mask
-
+from utils.detection_tools import  extract_contour_region, create_lab_range_mask, expand_mask
 
 
 def detect_basic(frame_to_process,frame_number=None,debug=False,
@@ -54,17 +42,18 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
 
     if ip_params is None:
         #print("Warning: No ImageProcessingParams object was passed. Using default values.")
-        ip_params = ImageProcessingParams(None)
+        pass
     
-    adaptive_threshold_max_value = ip_params.adaptive_threshold_max_value
-    adaptive_threshold_blockSize = ip_params.adaptive_threshold_blockSize
-    adaptive_threshold_constant = ip_params.adaptive_threshold_constant
-    sobel_pre_gaussian_kernel = ip_params.sobel_pre_gaussian_kernel
-    sobel_pre_gaussian_sigma  = ip_params.sobel_pre_gaussian_sigma
-    sobel_x_kernel = ip_params.sobel_x_kernel
-    sobel_y_kernel = ip_params.sobel_y_kernel
-    sobel_threshold = ip_params.sobel_threshold
-    object_area_threshold = ip_params.object_area_threshold
+        object_area_threshold = 400000000000 
+        adaptive_threshold_max_value = 255
+        adaptive_threshold_blockSize  = 5
+        adaptive_threshold_constant   = 4
+        sobel_pre_gaussian_kernel = [3,3]
+        sobel_pre_gaussian_sigma  = 0.5
+        sobel_x_kernel = 3
+        sobel_y_kernel = 3
+        sobel_threshold = 50
+        lab_offset = 10
 
     if debug:
         show_bgr(raw_frame, title=f"Raw Frame {frame_number}",
