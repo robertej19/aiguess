@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from utils.common_tools import annotate_image, show_bgr
 from utils.detection_tools import  extract_contour_region, create_lab_range_mask, expand_mask
-from auto_startup.config import ImageProcessingParams
+from resources.config import ImageProcessingParams
 
 def detect_basic(frame_to_process,frame_number=None,debug=False,
                    ip_params = None,save_figs=False,
