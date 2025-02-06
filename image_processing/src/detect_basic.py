@@ -8,7 +8,7 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from utils.common_tools import annotate_image, show_bgr
 from utils.detection_tools import  extract_contour_region, create_lab_range_mask, expand_mask
-
+from auto_startup.config import ImageProcessingParams
 
 def detect_basic(frame_to_process,frame_number=None,debug=False,
                    ip_params = None,save_figs=False,
@@ -41,22 +41,24 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
     # if pass a frame with no context, assume there is 1 easy to detect object in the frame, and write to yaml
 
     if ip_params is None:
-        #print("Warning: No ImageProcessingParams object was passed. Using default values.")
-        pass
-        object_area_threshold = 400000000000 
-        adaptive_threshold_max_value = 255
-        adaptive_threshold_blockSize  = 5
-        adaptive_threshold_constant   = 4
-        sobel_pre_gaussian_kernel = [3,3]
-        sobel_pre_gaussian_sigma  = 0.5
-        sobel_x_kernel = 3
-        sobel_y_kernel = 3
-        sobel_threshold = 50
-        lab_offset = 10
+        print("Warning: No ImageProcessingParams object was passed. Using default values.")
+        ip_params = ImageProcessingParams(None)
+    
+
+    adaptive_threshold_max_value = ip_params.adaptive_threshold_max_value
+    adaptive_threshold_blockSize = ip_params.adaptive_threshold_blockSize
+    adaptive_threshold_constant = ip_params.adaptive_threshold_constant
+    sobel_pre_gaussian_kernel = ip_params.sobel_pre_gaussian_kernel
+    sobel_pre_gaussian_sigma  = ip_params.sobel_pre_gaussian_sigma
+    sobel_x_kernel = ip_params.sobel_x_kernel
+    sobel_y_kernel = ip_params.sobel_y_kernel
+    sobel_threshold = ip_params.sobel_threshold
+    object_area_threshold = ip_params.object_area_threshold
 
     if debug:
         show_bgr(raw_frame, title=f"Raw Frame {frame_number}",
-                    w=debug_image_width,save_figs=save_figs)
+                    w=debug_image_width,
+                    save_fig=save_figs,save_fig_name=f"frame_{frame_number}/0_raw_frame.png")
         
  
     gray_raw_frame = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2GRAY)
@@ -66,7 +68,9 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
                                         sobel_pre_gaussian_sigma)
     if debug:
         show_bgr(blurred_gray_frame, title=f"Pre-Adaptive Threshold, Frame {frame_number}",
-                    w=debug_image_width)
+                    w=debug_image_width,
+                    save_fig=save_figs,save_fig_name=f"frame_{frame_number}/1_blurred_gray_frame.png")
+
         
     adaptive_thresh = cv2.adaptiveThreshold(
         blurred_gray_frame,
@@ -80,7 +84,8 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
 
     if debug:
         show_bgr(adaptive_thresh, title=f"Adaptive Threshold, Frame {frame_number}",
-                    w=debug_image_width)
+                    w=debug_image_width,
+                    save_fig=save_figs,save_fig_name=f"frame_{frame_number}/2_adaptive_thresh.png")
 
 
     # Sobel
@@ -94,22 +99,39 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
                  w=debug_image_width)
 
     # Threshold
-    _, canny_edges = cv2.threshold(sobel_abs, sobel_threshold, 
+    _, sobel_edges = cv2.threshold(sobel_abs, sobel_threshold, 
                                   255, cv2.THRESH_BINARY)
 
 
     if debug:
-        show_bgr(canny_edges, title=f"Edges in Frame, Frame {frame_number}",
-                 w=debug_image_width)
+        show_bgr(sobel_edges, title=f"Edges in Frame, Frame {frame_number}",
+                 w=debug_image_width,
+                    save_fig=save_figs,save_fig_name=f"frame_{frame_number}/3_sobel_edges.png")
 
 
     filtered_contours = None
     identified_object = None
 
-    contours, _ = cv2.findContours(canny_edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    contours, _ = cv2.findContours(sobel_edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    if debug:
+        # Draw all contours
+        frame_with_contours = raw_frame.copy()
+        cv2.drawContours(frame_with_contours, contours, -1, (0, 255, 0), 1)
+        show_bgr(frame_with_contours, title=f"All Contours, Frame {frame_number}",
+                 w=debug_image_width,
+                    save_fig=save_figs,save_fig_name=f"frame_{frame_number}/4_all_contours.png")
+
     if contours:
         # Filter contours to exclude those with an area larger than 400 pixels
         filtered_contours = [contour for contour in contours if cv2.contourArea(contour) <= object_area_threshold]
+
+    if debug:
+        # Draw filtered contours
+        frame_with_filtered_contours = raw_frame.copy()
+        cv2.drawContours(frame_with_filtered_contours, filtered_contours, -1, (0, 255, 0), 1)
+        show_bgr(frame_with_filtered_contours, title=f"Filtered Contours, Frame {frame_number}",
+                 w=debug_image_width,
+                    save_fig=save_figs,save_fig_name=f"frame_{frame_number}/5_filtered_contours.png")
 
     if filtered_contours:
         # Find the largest remaining contour
@@ -139,26 +161,29 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
         kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (5, 5))
 
         # Apply the closing operation.
-        closed = cv2.morphologyEx(canny_edges, cv2.MORPH_CLOSE, kernel)
+        closed = cv2.morphologyEx(sobel_edges, cv2.MORPH_CLOSE, kernel)
 
         # Optionally, find contours on the closed image:
         contours, hierarchy = cv2.findContours(closed, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
         # Draw the closed contour on a copy of the original image for visualization
-        output = cv2.cvtColor(canny_edges, cv2.COLOR_GRAY2BGR)
+        output = cv2.cvtColor(sobel_edges, cv2.COLOR_GRAY2BGR)
         cv2.drawContours(output, contours, -1, (0, 255, 0), 2)
 
         if debug:
             show_bgr(output, title=f"Closed Contours, Frame {frame_number}",
-                     w=debug_image_width)
+                     w=debug_image_width,
+                    save_fig=save_figs,save_fig_name=f"frame_{frame_number}/6_closed_contour_object.png")
         zoomed_in = raw_frame[y-2:y+h+2, x-2:x+w+2]
 
         if debug:
             show_bgr(zoomed_in, title=f"Zoomed In, Frame {frame_number}",
-                     w=debug_image_width)
+                     w=debug_image_width,
+                    save_fig=save_figs,save_fig_name=f"frame_{frame_number}/7_zoomed_in.png")
             
             show_bgr(extracted, title=f"Extracted Region, Frame {frame_number}",
-                     w=debug_image_width)
+                     w=debug_image_width,
+                    save_fig=save_figs,save_fig_name=f"frame_{frame_number}/8_extracted.png")
             
         cv2.rectangle(frame_to_return, (x-2*w, y-2*h), (x+4*w, y+4*h), (0, 0, 255), 4)
         cv2.drawContours(frame_to_return, [identified_object], -1, (0, 255, 0), 1)
@@ -177,7 +202,8 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
 
     if debug:
         show_bgr(frame_to_return, title=f"Detected Object, Frame {frame_number}",
-                 w=debug_image_width)
+                 w=debug_image_width,
+                    save_fig=save_figs,save_fig_name=f"frame_{frame_number}/9_detected_object.png")
                  
 
     return frame_to_return, cx,cy,w,h, contour_mask, identified_object

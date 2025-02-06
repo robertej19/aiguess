@@ -119,12 +119,18 @@ def annotate_image(frame, text,x_pos=None,y_pos=None,text_size=2):
     
     return frame
 
-def show_bgr(frame,w=5,title=""):
+def show_bgr(frame,w=5,title="",save_fig=False,save_fig_name="./output.png"):
     plt.figure(figsize=(w,int(w/1.6)))
     frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     plt.imshow(frame_rgb)
     plt.title(title)
-    plt.show()
+    if save_fig:
+        #make path if it does not exist
+        os.makedirs(os.path.dirname(save_fig_name), exist_ok=True)
+        plt.savefig(save_fig_name)
+        plt.close()    
+    else:
+        plt.show()
 
 
 def assemble_frames_to_video(input_dir, output_video_path, fps=15, frame_pattern='frame_*.jpg'):

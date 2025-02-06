@@ -89,9 +89,10 @@ def generate_sequence(
     output_file = open(log_file_name, "w")
     output_file.write("frame_number,local_dot_x_truth,local_dot_y_truth,yaw_deg,pitch_deg,zoom,global_dot_x_truth,global_dot_y_truth,global_dot_size_truth\n")
     
-    roll_start_deg = -180
-    roll_end_deg = 180
+    roll_start_deg = -18
+    roll_end_deg = 18
 
+    print(zoom_end)
 
     for i in range(num_frames):
         cy -=5
