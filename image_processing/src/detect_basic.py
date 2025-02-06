@@ -11,10 +11,10 @@ from utils.detection_tools import  extract_contour_region, create_lab_range_mask
 
 
 def detect_basic(frame_to_process,frame_number=None,debug=False,
-                   ip_params = None,
-    debug_image_width = 14,
-    b_range = None,
-    o_range = None):
+                   ip_params = None,save_figs=False,
+                    debug_image_width = 14,
+                    b_range = None,
+                    o_range = None):
     
     raw_frame = frame_to_process.copy()
     frame_to_return = frame_to_process.copy()
@@ -43,7 +43,6 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
     if ip_params is None:
         #print("Warning: No ImageProcessingParams object was passed. Using default values.")
         pass
-    
         object_area_threshold = 400000000000 
         adaptive_threshold_max_value = 255
         adaptive_threshold_blockSize  = 5
@@ -57,7 +56,7 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
 
     if debug:
         show_bgr(raw_frame, title=f"Raw Frame {frame_number}",
-                    w=debug_image_width)
+                    w=debug_image_width,save_figs=save_figs)
         
  
     gray_raw_frame = cv2.cvtColor(raw_frame, cv2.COLOR_BGR2GRAY)
