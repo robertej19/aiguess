@@ -59,7 +59,13 @@ def generate_sequence(
     large_img_original = cv2.imread(large_image_path)
     if large_img_original is None:
         raise ValueError(f"Could not load '{large_image_path}'.")
-    large_img_original = large_img_original[0:1400,0:large_img_original.shape[1]]
+    
+    # if the image is too small, resize it:
+    if large_img_original.shape[0] < output_height or large_img_original.shape[1] < output_width:
+        large_img_original = cv2.resize(large_img_original, (int(output_width*1.5), int(output_width*1.5)), interpolation=cv2.INTER_CUBIC)
+
+    #optionally: crop:
+    large_img_original = large_img_original[0:large_img_original.shape[0],0:large_img_original.shape[1]]
     H, W, _ = large_img_original.shape
 
     if W < output_width or H < output_height:

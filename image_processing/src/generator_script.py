@@ -8,7 +8,7 @@ from src.generation_routine import generate_sequence
 
 
 work_dir = os.getcwd()
-image_list = ["horizon_2",]#,"horizon_4","horizon_6","horizon_8","horizon_10","horizon_12"]
+image_list = ["foi_2",]#,"horizon_4","horizon_6","horizon_8","horizon_10","horizon_12"]
 
 for i in image_list:
     base_image_name = i
