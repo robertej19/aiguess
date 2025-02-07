@@ -17,7 +17,7 @@ from utils.common_tools import annotate_image, show_bgr
 from utils.common_tools import find_nonzero_bounding_box, trim_video, draw_parallel_lines
 
 from utils.detection_tools import get_min_max_hsv, extract_contour_region
-from auto_startup.config import ImageProcessingParams
+from resources.config import ImageProcessingParams
 
 
 

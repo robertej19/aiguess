@@ -252,6 +252,7 @@ def stack_videos(video1_path,
 
 
 
+
 def line_sky_coverage_ratio(sky_mask, line_start, line_end):
     """
     Returns the fraction of 'line_start -> line_end' 

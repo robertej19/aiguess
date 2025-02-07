@@ -30,6 +30,7 @@ def main():
         sys.exit(1)
 
     video_path = sys.argv[1]
+    print(video_path)
     cap = cv2.VideoCapture(video_path)
     #cap = cv2.VideoCapture(0) #use usb cam
 
@@ -42,7 +43,7 @@ def main():
     playcounter = 2
     b_range = None
     o_range = None
-    test_frame = cv2.imread('auto_startup/foi_2.png')
+    test_frame = cv2.imread('resources/foi_2.png')
     complete_frame, x,y,w,h, contour_mask, identified_object = detect_basic(test_frame,1,debug=False,
                                                                             debug_image_width=20)
 
