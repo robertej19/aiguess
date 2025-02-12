@@ -18,11 +18,13 @@ from utils.common_tools import numbered_framing_from_ascii, show_bgr
 def main():
 
 
-    output_filename = f"frame_of_interest_{video_frame_number}.png"
     video_frame_number = 30
+    output_filename = f"frame_of_interest_{video_frame_number}.png"
+    output_path = os.path.join("resources/", output_filename)
+
 
     if len(sys.argv) < 2:
-        print("Using {output_filename}")
+        print("Using {output_path}")
     elif len(sys.argv) == 3:
         video_path= sys.argv[1]
         video_frame_number = int(sys.argv[2])
@@ -32,9 +34,7 @@ def main():
         sys.exit(1)
 
 
-
     output_filename = f"frame_of_interest_{video_frame_number}.png"
-    output_path = os.path.join("resources/", output_filename)
 
     cap = cv2.VideoCapture(video_path)
     if not cap.isOpened():
