@@ -177,13 +177,20 @@ def add_dot_and_bounding_box(
         min(bottom_right[1], height - 1)
     )
 
+    # Make a copy of image with dot
+    image_with_dot_framed = image_with_dot.copy()
+    # crop it to the bounding box
+    image_with_dot_framed = image_with_dot_framed[top_left[1]:bottom_right[1], top_left[0]:bottom_right[0]]
+
     cv2.rectangle(image_with_box, top_left, bottom_right, box_color, box_thickness)
 
-    return image_with_dot, image_with_box
+    #resize the image_with_dot_framed to be the same size as image_with_dot
+    image_with_dot_framed = cv2.resize(image_with_dot_framed, (image_with_dot.shape[1], image_with_dot.shape[0]), interpolation = cv2.INTER_AREA)
+    return image_with_dot, image_with_box, image_with_dot_framed
 
 
 ##### DOT WITH SMEAR
-def add_dot_and_bounding_box_precisely_with_smear(image, 
+def add_dot_and_bounding_box_precisely_with_smear_UNUSED(image, 
                                                   x_center, 
                                                   y_center, 
                                                   object_size,

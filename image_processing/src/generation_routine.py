@@ -16,6 +16,7 @@ def generate_sequence(
     output_dir_dot="synth_track",
     output_dir_box="synth_track_box",
     output_dir_pose="synth_track_pose",
+    output_dir_object_zoomed = "synth_track_zoomed",
     log_file_name = "frame_data.txt",
     num_frames=60,
     output_width=1920,
@@ -75,6 +76,7 @@ def generate_sequence(
     os.makedirs(output_dir_dot, exist_ok=True)
     os.makedirs(output_dir_box, exist_ok=True)
     os.makedirs(output_dir_pose, exist_ok=True)
+    os.makedirs(output_dir_object_zoomed, exist_ok=True)
 
     # Destination corners for the 1920x1080 output
     dst_corners = np.float32([
@@ -130,7 +132,7 @@ def generate_sequence(
         large_img = large_img_original.copy()
 
         # Draw the dot and bounding box
-        img_dot, img_box = add_dot_and_bounding_box(
+        img_dot, img_box,dot_framed = add_dot_and_bounding_box(
             large_img,
             x_center=dot_x_center,
             method="smear",
@@ -237,7 +239,7 @@ def generate_sequence(
         filename_dot = os.path.join(output_dir_dot, f"frame_{frame_number:03}.jpg")
         filename_box = os.path.join(output_dir_box, f"frame_{frame_number:03}_box.jpg")
         filename_pose = os.path.join(output_dir_pose, f"frame_{frame_number:03}_pose.jpg")
-
+        filename_zoomed = os.path.join(output_dir_object_zoomed, f"frame_{frame_number:03}_zoomed.jpg")
         text = f"Object: ({int(dot_x_center)}, {int(dot_y_center)}), {int(dot_size)} pixels wide | Camera: {int(yaw_deg)} Yaw, {int(pitch_deg)} Pitch, {zoom:.1f} Zoom"
 
         img_pose = annotate_image(img_pose,text)
@@ -257,10 +259,16 @@ def generate_sequence(
         sx = (dot_x_center-dot_size*3)
         s_global = global_base_frame[sy:dot_y_center+dot_size*3,sx:dot_x_center+dot_size*3]
         #show_bgr(s_global)
+
+
         
+        #upscale s1 to the same size as the final output frame
+        s1 = cv2.resize(s1, (output_width, output_height), interpolation=cv2.INTER_CUBIC)
         cv2.imwrite(filename_dot, warped_dot)
         cv2.imwrite(filename_box, warped_box)
         cv2.imwrite(filename_pose, img_pose)
+        #save white and black backdround dots
+        cv2.imwrite(filename_zoomed,s1)
 
         if i % 10 == 0:
             print(f"Saved:\n {filename_pose}")

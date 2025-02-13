@@ -8,7 +8,7 @@ from src.generation_routine import generate_sequence
 
 
 work_dir = os.getcwd()
-image_list = ["foi_2",]#,"horizon_4","horizon_6","horizon_8","horizon_10","horizon_12"]
+image_list = ["horizon_2",]#,"horizon_4","horizon_6","horizon_8","horizon_10","horizon_12"]
 
 for i in image_list:
     base_image_name = i
@@ -16,17 +16,18 @@ for i in image_list:
     #set values
     this_image_path = work_dir+"/source_images_for_generation/base_images/"+base_image_name+".png"
     this_output_dir_dot="synth_videos/"+base_image_name+"/synth_track"
+    this_output_dir_object_zoomed="synth_videos/"+base_image_name+"/synth_track_zoomed"
     this_output_dir_box="synth_videos/"+base_image_name+"/synth_track_box"
     this_output_dir_pose="synth_videos/"+base_image_name+"/synth_track_pose"
     this_log_file_name="synth_videos/"+base_image_name+"/frame_data.txt"
     this_zoom_start = 1
     this_zoom_end = 0.01 #0.5 is 2x zoom
-    this_pitch_start_deg = 0
-    this_pitch_end_deg = -30 #negative is up
+    this_pitch_start_deg = -20
+    this_pitch_end_deg = -60 #negative is up
     this_yaw_amplitude_deg = 1
     this_yaw_period=30 # frames per full left-right-left cycle
-    this_dot_y_center=290
-    this_dot_initial_x=1225
+    this_dot_y_center=560
+    this_dot_initial_x=1235
     this_dot_inter_frame_speed=1   # jump 10 px in global frame
     this_dot_size=1
     this_random_seed = 42
@@ -42,6 +43,7 @@ for i in image_list:
         output_dir_dot=this_output_dir_dot,
         output_dir_box=this_output_dir_box,
         output_dir_pose=this_output_dir_pose,
+        output_dir_object_zoomed=this_output_dir_object_zoomed,
         log_file_name = this_log_file_name,
         num_frames=60,
         output_width=1280,
@@ -61,7 +63,7 @@ for i in image_list:
         synth_noise_level = synth_noise_level
         )
 
-        videos_to_assemble = [this_output_dir_dot,this_output_dir_box,this_output_dir_pose]
+        videos_to_assemble = [this_output_dir_dot,this_output_dir_box,this_output_dir_pose,this_output_dir_object_zoomed]
     
         for v in videos_to_assemble:
             input_directory = v
