@@ -1,5 +1,8 @@
 
 import pandas as pd
+import matplotlib
+#use agg
+
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -45,7 +48,9 @@ def calculate_errors(truth_data_file,estimated_data_file):
     plt.xlabel('Frame Index')
     plt.ylabel('Euclidean Distance')
     plt.grid(True)
-    plt.show()
-
+    #plt.show()
+    # save figure
+    plt.savefig("Analysis_of_detrac.png")
+    plt.close()
     # 6. (Optional) Inspect the merged data
     print(merged_df.head())
