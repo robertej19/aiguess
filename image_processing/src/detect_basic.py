@@ -8,7 +8,6 @@ sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from utils.common_tools import annotate_image, show_bgr
 from utils.detection_tools import  extract_contour_region, create_lab_range_mask, expand_mask
-from resources.config import ImageProcessingParams
 
 def detect_basic(frame_to_process,frame_number=None,debug=False,
                    ip_params = None,save_figs=False,
@@ -22,39 +21,51 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
     if b_range is not None:
         if o_range is not None:
             # enable color processing
-            min_vals_extended = b_range[0]-10
-            max_vals_extended = b_range[0]+10
+            min_vals_extended = np.array([b_range[0][0]-100, b_range[0][1]-100, b_range[0][2]-30])
+            max_vals_extended = np.array([b_range[1][0]+100, b_range[1][1]+100, b_range[1][2]+30])
+            print("new min max",min_vals_extended,max_vals_extended)
             m_b = create_lab_range_mask(raw_frame, min_vals_extended, max_vals_extended)
 
-            big_b = expand_mask(m_b, kernel_size=5)
+            big_b = expand_mask(m_b, kernel_size=20)
 
 
-            min_vals_extended = o_range[0]-30
-            max_vals_extended = o_range[1]+30
+            min_vals_extended = o_range[0]-50
+            max_vals_extended = o_range[1]+50
+            print("min max",min_vals_extended,max_vals_extended)
             m_o= create_lab_range_mask(raw_frame, min_vals_extended, max_vals_extended)
 
             combined_mask = cv2.bitwise_and(big_b, m_o)
             #apply combined_mask to raw_frame
-            raw_frame = cv2.bitwise_and(raw_frame, raw_frame, mask=combined_mask)
+            raw_frame = cv2.bitwise_and(raw_frame, raw_frame, mask=big_b)
 
             
+    
     # if pass a frame with no context, assume there is 1 easy to detect object in the frame, and write to yaml
-
     if ip_params is None:
         print("Warning: No ImageProcessingParams object was passed. Using default values.")
-        ip_params = ImageProcessingParams(None)
-    
-
-    adaptive_threshold_max_value = ip_params.adaptive_threshold_max_value
-    adaptive_threshold_blockSize = ip_params.adaptive_threshold_blockSize
-    adaptive_threshold_constant = ip_params.adaptive_threshold_constant
-    sobel_pre_gaussian_kernel = ip_params.sobel_pre_gaussian_kernel
-    sobel_pre_gaussian_sigma  = ip_params.sobel_pre_gaussian_sigma
-    sobel_x_kernel = ip_params.sobel_x_kernel
-    sobel_y_kernel = ip_params.sobel_y_kernel
-    sobel_threshold = ip_params.sobel_threshold
-    object_area_threshold = ip_params.object_area_threshold
-
+        adaptive_threshold_max_value = 255
+        adaptive_threshold_blockSize  = 53
+        adaptive_threshold_constant   = 51.5579384567383
+        sobel_pre_gaussian_kernel = [3,3]
+        sobel_pre_gaussian_sigma  = 0.5
+        sobel_x_kernel = 3
+        sobel_y_kernel = 3
+        sobel_threshold = 50
+        lab_offset = 10
+        object_w_max_threshold = 18
+        object_h_max_threshold = 4.729192443183128
+    else:
+        adaptive_threshold_max_value = ip_params.adaptive_threshold_max_value
+        adaptive_threshold_blockSize = ip_params.adaptive_threshold_blockSize
+        adaptive_threshold_constant = ip_params.adaptive_threshold_constant
+        sobel_pre_gaussian_kernel = ip_params.sobel_pre_gaussian_kernel
+        sobel_pre_gaussian_sigma  = ip_params.sobel_pre_gaussian_sigma
+        sobel_x_kernel = ip_params.sobel_x_kernel
+        sobel_y_kernel = ip_params.sobel_y_kernel
+        sobel_threshold = ip_params.sobel_threshold
+        object_w_max_threshold = ip_params.object_w_max_threshold
+        object_h_max_threshold = ip_params.object_h_max_threshold
+        
     if debug:
         show_bgr(raw_frame, title=f"Raw Frame {frame_number}",
                     w=debug_image_width,
@@ -123,7 +134,9 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
 
     if contours:
         # Filter contours to exclude those with an area larger than 400 pixels
-        filtered_contours = [contour for contour in contours if cv2.contourArea(contour) <= object_area_threshold]
+        # filtered_contours = [contour for contour in contours if cv2.contourArea(contour) <= object_area_threshold]
+        # instead of filtering on area, filter on min and max w and h
+        filtered_contours = [contour for contour in contours if cv2.boundingRect(contour)[2] <= object_w_max_threshold and cv2.boundingRect(contour)[3] <= object_h_max_threshold]
 
     if debug:
         # Draw filtered contours

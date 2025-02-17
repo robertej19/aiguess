@@ -2,7 +2,7 @@ import cv2,sys,os
 import matplotlib.pyplot as plt
 import cv2, os, math, glob
 import matplotlib.pyplot as plt
-
+import numpy as np
 
 os.sys.path.append(os.getcwd())
 
@@ -17,6 +17,32 @@ from utils.common_tools import annotate_image, show_bgr, draw_parallel_lines
 from src.detect_basic import detect_basic
 from src.analysis_routine import calculate_errors
 
+
+# create an image processing parameters class
+class ImageProcessingParams:
+    def __init__(self, adaptive_threshold_max_value=255, 
+                 adaptive_threshold_blockSize=5, 
+                 adaptive_threshold_constant=4,
+                 sobel_pre_gaussian_kernel=[3,3],
+                 sobel_pre_gaussian_sigma=0.5,
+                 sobel_x_kernel=3,
+                 sobel_y_kernel=3,
+                 sobel_threshold=50,
+                 lab_offset=10,
+                 object_w_max_threshold=20,
+                 object_h_max_threshold=20):
+        
+        self.adaptive_threshold_max_value = adaptive_threshold_max_value
+        self.adaptive_threshold_blockSize = adaptive_threshold_blockSize
+        self.adaptive_threshold_constant = adaptive_threshold_constant
+        self.sobel_pre_gaussian_kernel = sobel_pre_gaussian_kernel
+        self.sobel_pre_gaussian_sigma = sobel_pre_gaussian_sigma
+        self.sobel_x_kernel = sobel_x_kernel
+        self.sobel_y_kernel = sobel_y_kernel
+        self.sobel_threshold = sobel_threshold
+        self.lab_offset = lab_offset
+        self.object_w_max_threshold = object_w_max_threshold
+        self.object_h_max_threshold = object_h_max_threshold
 
 def process_videos(base_name_list):
     for image_name in base_name_list:
@@ -45,7 +71,14 @@ def process_videos(base_name_list):
         if not cap.isOpened():
             raise ValueError(f"Error opening video file: {video_to_process_path}")
 
-        for i in range(0, 61):
+
+
+
+        background_lab_mean = [np.array([192 ,123,  91]),np.array( [202, 133 , 98])]
+        object_lab_mean = [np.array([  140, 128, 121]), np.array([167, 190, 164])]
+        #background_lab_mean = None
+        #object_lab_mean = None
+        for i in range(50, 55):
             if i % 10 == 0:
                 print(f"processing frame {i} in {image_name}")
             frame_number = i
@@ -60,8 +93,14 @@ def process_videos(base_name_list):
                 continue
 
             #raw_frame = raw_frame[0:720,0:1280]
-            # Process the frame and get the output data
-            output_frame, cx,cy,w,h, contour_mask, identified_object = detect_basic(raw_frame,i,debug=False)
+            # Process the frame and get the output data          (frame_to_process,frame_number=None,debug=False,
+
+                    
+            output_frame, cx,cy,w,h, contour_mask, identified_object = detect_basic(raw_frame,i,debug=True,
+                                                                                    ip_params = None,save_figs=True,
+                                                                                    debug_image_width = 14,
+                                                                                    b_range = background_lab_mean,
+                                                                                    o_range = object_lab_mean)
             rectified_frame = output_frame.copy() #don't return recification anymore
             # Save the processed frame to the output directory
             output_frame_path = os.path.join(processed_frames_dir, f"frame_{frame_index:03}.jpg")
@@ -77,6 +116,8 @@ def process_videos(base_name_list):
     # Close the video capture and processed_data.txt file
     cap.release()
     processed_data_file.close()
+    """
+
     output_video_path = f"synth_videos/{base_image_name}/processed_track_video.mp4" 
     output_rect_video_path = f"synth_videos/{base_image_name}/rectified_processed_track_video.mp4" 
 
@@ -97,7 +138,7 @@ def process_videos(base_name_list):
                  video2_path = f"synth_videos/{base_image_name}/synth_track_box_video.mp4",
                  output_video_path = f"synth_videos/{base_image_name}/rect_combined_video.mp4")
     print("Rectified combined video assembled")
-
+    """
 
 if __name__ == "__main__":
     base_name_list = ["horizon_2"]
