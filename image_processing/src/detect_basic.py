@@ -12,29 +12,38 @@ from utils.detection_tools import  extract_contour_region, create_lab_range_mask
 def detect_basic(frame_to_process,frame_number=None,debug=False,
                    ip_params = None,save_figs=False,
                     debug_image_width = 14,
-                    b_range = None,
-                    o_range = None):
+                    b_range = None,o_range = None,
+                    y_min = 0,y_max = 1,
+                    x_min = 0,x_max = 1,
+                    expected_w = 10, expected_h = 10):
     
     raw_frame = frame_to_process.copy()
     frame_to_return = frame_to_process.copy()
-
+    raw_frame = raw_frame[y_min:y_max,x_min:x_max]
     if b_range is not None:
         if o_range is not None:
             # enable color processing
-            min_vals_extended = np.array([b_range[0][0]-100, b_range[0][1]-100, b_range[0][2]-30])
-            max_vals_extended = np.array([b_range[1][0]+100, b_range[1][1]+100, b_range[1][2]+30])
+            b_plus_hi = 200
+            b_plus_low = 200
+
+            b_two =200
+            b_three_hi = 35
+            b_three_lo = 200
+            
+            min_vals_extended = np.array([b_range[0][0]-b_plus_low, b_range[0][1]-b_two, b_range[0][2]-b_three_lo])
+            max_vals_extended = np.array([b_range[1][0]+b_plus_hi, b_range[1][1]+b_two, b_range[1][2]+b_three_hi])
             print("new min max",min_vals_extended,max_vals_extended)
             m_b = create_lab_range_mask(raw_frame, min_vals_extended, max_vals_extended)
 
-            big_b = expand_mask(m_b, kernel_size=20)
+            big_b = expand_mask(m_b, kernel_size=5)
 
 
-            min_vals_extended = o_range[0]-50
-            max_vals_extended = o_range[1]+50
+            min_vals_extended = o_range[0]-10
+            max_vals_extended = o_range[1]+10
             print("min max",min_vals_extended,max_vals_extended)
             m_o= create_lab_range_mask(raw_frame, min_vals_extended, max_vals_extended)
 
-            combined_mask = cv2.bitwise_and(big_b, m_o)
+            combined_mask = cv2.bitwise_or(big_b, m_o)
             #apply combined_mask to raw_frame
             raw_frame = cv2.bitwise_and(raw_frame, raw_frame, mask=big_b)
 
@@ -44,16 +53,14 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
     if ip_params is None:
         print("Warning: No ImageProcessingParams object was passed. Using default values.")
         adaptive_threshold_max_value = 255
-        adaptive_threshold_blockSize  = 53
-        adaptive_threshold_constant   = 51.5579384567383
+        adaptive_threshold_blockSize  = 5#11
+        adaptive_threshold_constant   = 3#7
         sobel_pre_gaussian_kernel = [3,3]
-        sobel_pre_gaussian_sigma  = 0.5
+        sobel_pre_gaussian_sigma  = 1
         sobel_x_kernel = 3
         sobel_y_kernel = 3
         sobel_threshold = 50
         lab_offset = 10
-        object_w_max_threshold = 18
-        object_h_max_threshold = 4.729192443183128
     else:
         adaptive_threshold_max_value = ip_params.adaptive_threshold_max_value
         adaptive_threshold_blockSize = ip_params.adaptive_threshold_blockSize
@@ -63,9 +70,10 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
         sobel_x_kernel = ip_params.sobel_x_kernel
         sobel_y_kernel = ip_params.sobel_y_kernel
         sobel_threshold = ip_params.sobel_threshold
-        object_w_max_threshold = ip_params.object_w_max_threshold
-        object_h_max_threshold = ip_params.object_h_max_threshold
         
+    object_w_max_threshold = expected_w*3.5
+    object_h_max_threshold = expected_h*3.5
+
     if debug:
         show_bgr(raw_frame, title=f"Raw Frame {frame_number}",
                     w=debug_image_width,
@@ -167,6 +175,8 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
             cx = x
             cy = y
         
+        cx = cx + x_min
+        cy = cy + y_min
 
         extracted, contour_mask = extract_contour_region(raw_frame, identified_object)
 
@@ -187,7 +197,7 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
             show_bgr(output, title=f"Closed Contours, Frame {frame_number}",
                      w=debug_image_width,
                     save_fig=save_figs,save_fig_name=f"frame_{frame_number}/6_closed_contour_object.png")
-        zoomed_in = raw_frame[y-2:y+h+2, x-2:x+w+2]
+        zoomed_in = frame_to_return[cy-2:cy+h+2, cx-2:cx+w+2]
 
         if debug:
             show_bgr(zoomed_in, title=f"Zoomed In, Frame {frame_number}",
@@ -198,7 +208,7 @@ def detect_basic(frame_to_process,frame_number=None,debug=False,
                      w=debug_image_width,
                     save_fig=save_figs,save_fig_name=f"frame_{frame_number}/8_extracted.png")
             
-        cv2.rectangle(frame_to_return, (x-2*w, y-2*h), (x+4*w, y+4*h), (0, 0, 255), 4)
+        cv2.rectangle(frame_to_return, (cx-2*w, cy-2*h), (cx+4*w, cy+4*h), (0, 0, 255), 4)
         cv2.drawContours(frame_to_return, [identified_object], -1, (0, 255, 0), 1)
 
     else:

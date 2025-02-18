@@ -74,11 +74,17 @@ def process_videos(base_name_list):
 
 
 
-        background_lab_mean = [np.array([192 ,123,  91]),np.array( [202, 133 , 98])]
-        object_lab_mean = [np.array([  140, 128, 121]), np.array([167, 190, 164])]
-        #background_lab_mean = None
-        #object_lab_mean = None
-        for i in range(50, 55):
+        #background_lab_mean = [np.array([192 ,123,  91]),np.array( [202, 133 , 98])]
+        #object_lab_mean = [np.array([  140, 128, 121]), np.array([167, 190, 164])]
+        background_lab_mean = None
+        object_lab_mean = None
+        y_min = 50
+        y_max = 100
+        x_min = 600
+        x_max = 700
+        initial_w = 4
+        initial_h = 4
+        for i in range(0, 58):
             if i % 10 == 0:
                 print(f"processing frame {i} in {image_name}")
             frame_number = i
@@ -94,13 +100,24 @@ def process_videos(base_name_list):
 
             #raw_frame = raw_frame[0:720,0:1280]
             # Process the frame and get the output data          (frame_to_process,frame_number=None,debug=False,
-
-                    
-            output_frame, cx,cy,w,h, contour_mask, identified_object = detect_basic(raw_frame,i,debug=True,
-                                                                                    ip_params = None,save_figs=True,
+            output_frame, cx,cy,w,h, contour_mask, identified_object = detect_basic(raw_frame,i,debug=False,
+                                                                                    ip_params = None,save_figs=False,
                                                                                     debug_image_width = 14,
                                                                                     b_range = background_lab_mean,
-                                                                                    o_range = object_lab_mean)
+                                                                                    o_range = object_lab_mean,
+                                                                                    y_min = y_min,
+                                                                                    y_max = y_max,
+                                                                                    x_min = x_min,
+                                                                                    x_max = x_max,
+                                                                                    expected_w = initial_w,
+                                                                                    expected_h = initial_h)
+            print(cx,cy)
+            y_min = cy-20
+            y_max = cy+20
+            x_min = cx-20
+            x_max = cx+20
+            initial_w = w
+            initial_h = h
             rectified_frame = output_frame.copy() #don't return recification anymore
             # Save the processed frame to the output directory
             output_frame_path = os.path.join(processed_frames_dir, f"frame_{frame_index:03}.jpg")
@@ -116,7 +133,7 @@ def process_videos(base_name_list):
     # Close the video capture and processed_data.txt file
     cap.release()
     processed_data_file.close()
-    """
+    
 
     output_video_path = f"synth_videos/{base_image_name}/processed_track_video.mp4" 
     output_rect_video_path = f"synth_videos/{base_image_name}/rectified_processed_track_video.mp4" 
@@ -138,7 +155,7 @@ def process_videos(base_name_list):
                  video2_path = f"synth_videos/{base_image_name}/synth_track_box_video.mp4",
                  output_video_path = f"synth_videos/{base_image_name}/rect_combined_video.mp4")
     print("Rectified combined video assembled")
-    """
+    
 
 if __name__ == "__main__":
     base_name_list = ["horizon_2"]
