@@ -220,6 +220,80 @@ def radial_layout_rules(tree: OrgTree, radius_step=1.0, depth_lookup: dict | Non
 
 
 # -------------------------
+# Edge geometry (piecewise: straight trunk then outward curve)
+# -------------------------
+
+def _quad_bezier_points(p0, p1, pc, steps=28):
+    """Sample a quadratic Bezier from p0->p1 with control point pc."""
+    xs, ys = [], []
+    for j in range(steps + 1):
+        t = j / steps
+        mt = 1 - t
+        x = mt * mt * p0[0] + 2 * mt * t * pc[0] + t * t * p1[0]
+        y = mt * mt * p0[1] + 2 * mt * t * pc[1] + t * t * p1[1]
+        xs.append(x)
+        ys.append(y)
+    xs.append(None); ys.append(None)
+    return xs, ys
+
+
+def edge_coordinates_with_curves(pos: dict, tree: OrgTree, radius_step: float = 1.0):
+    """Return x,y lists for edges.
+    For any non-CEO node with >1 children (i.e., branches), each edge is:
+      1) a straight **trunk** from the parent radius R to mid-radius R+(r/2) along the
+         parent's radial direction, then
+      2) an **outward-bending** quadratic Bezier from that midpoint to the child at
+         radius R+r.
+    CEO edges and single-child edges remain straight.
+    """
+    ex, ey = [], []
+
+    outward_eps = 0.06 * radius_step  # small push so the curve bulges outward
+
+    for manager, kids in tree.children.items():
+        if not kids:
+            continue
+        x0, y0 = pos[manager]
+        r0 = math.hypot(x0, y0)
+        th0 = math.atan2(y0, x0)
+
+        if manager != tree.root and len(kids) > 1:
+            # Compute a single trunk midpoint for this parent (drawn once)
+            # Use the farthest child radius to define a consistent midpoint trunk.
+            r_children = [math.hypot(pos[c][0], pos[c][1]) for c in kids]
+            r1_max = max(r_children)
+            r_mid = 0.5 * (r0 + r1_max)
+            mx = r_mid * math.cos(th0)
+            my = r_mid * math.sin(th0)
+
+            # Draw the straight trunk once
+            ex += [x0, mx, None]
+            ey += [y0, my, None]
+
+            # Now, for each child, draw the outward curve from the midpoint to the child
+            for child in kids:
+                x1, y1 = pos[child]
+                r1 = math.hypot(x1, y1)
+                th1 = math.atan2(y1, x1)
+
+                # Control point at child's angle but slightly beyond child's radius
+                r_ctrl = r1 + outward_eps
+                cx = r_ctrl * math.cos(th1)
+                cy = r_ctrl * math.sin(th1)
+
+                xs, ys = _quad_bezier_points((mx, my), (x1, y1), (cx, cy), steps=28)
+                ex += xs; ey += ys
+        else:
+            # straight lines (CEO or single-child)
+            for child in kids:
+                x1, y1 = pos[child]
+                ex += [x0, x1, None]
+                ey += [y0, y1, None]
+
+    return ex, ey
+
+
+# -------------------------
 # Color helpers
 # -------------------------
 # Build a long qualitative palette by concatenating several Plotly sets.
@@ -252,15 +326,8 @@ def _category_colors(categories):
 # -------------------------
 
 def org_to_figure(tree: OrgTree, pos: dict, df: pd.DataFrame, color_by: str | None):
-    # Edge trace first (behind nodes)
-    ex, ey = [], []
-    for manager, reports in tree.children.items():
-        x0, y0 = pos[manager]
-        for emp in reports:
-            x1, y1 = pos[emp]
-            ex += [x0, x1, None]
-        
-            ey += [y0, y1, None]
+    # Edge trace (use curves where appropriate)
+    ex, ey = edge_coordinates_with_curves(pos, tree)
     edge_trace = go.Scatter(x=ex, y=ey, mode='lines', line=dict(width=1, color='#888'), hoverinfo='skip', name='edges', showlegend=False)
 
     # Build metadata lookup (use plain dicts to avoid pandas Series truthiness issues)
