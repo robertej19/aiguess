@@ -1,0 +1,61 @@
+﻿employee,manager,role,team
+CEO,None,executive,Management
+CFO,CEO,executive,Finance
+CTO,CEO,executive,Technology
+CPO,CEO,executive,Product
+CLO,CEO,executive,Legal
+1CFO,CEO,manager,Finance
+1CTO,CEO,manager,Technology
+11CPO,CEO,manager,Product
+1CLO,CEO,manager,Legal
+Tech 1,CTO,engineer 3,Technology
+Tech 2,CTO,engineer 3,Technology 
+Tech 3,CTO,engineer 3,Technology
+Tech 4,CTO,engineer 3,Technology
+Tech 5,CTO,engineer 3,Technology
+Tech 12,CTO,engineer 3,Technology
+Tech 13,CTO,engineer 3,Technology
+Tech 14,CTO,engineer 3,Technology
+Tech 15,CTO,engineer 3,Technology
+Tech 22,CTO,engineer 3,Technology
+Tech 23,CTO,engineer 3,Technology
+Tech 24,CTO,engineer 3,Technology
+Tech 25,CTO,engineer 3,Technology
+Tech 44,CTO,engineer 3,Technology
+Tech 45,CTO,engineer 3,Technology
+Tech 412,CTO,engineer 3,Technology
+Tech 413,CTO,engineer 3,Technology
+Tech 414,CTO,engineer 3,Technology
+Tech 415,CTO,engineer 3,Technology
+Tech 422,CTO,engineer 3,Technology
+Tech 423,CTO,engineer 3,Technology
+Tech 424,CTO,engineer 3,Technology
+Tech 425,CTO,engineer 3,Technology
+Finance 1,CFO,manager,Finance
+Finance 2,CFO,manager,Finance
+Finance 3,CFO,manager,Finance
+Finance 4,CFO,manager,Finance
+HR 1,CPO,manager,HR
+HR 2,CPO,manager,HR
+HR 3,CPO,manager,HR
+Legal 1,CLO,manager,Legal
+Legal 2,CLO,manager,Legal
+2Tech 1,Tech 1,engineer 3,Hardware Technology
+2Tech 2,Tech 1,engineer 3,Hardware Technology
+2Tech 3,Tech 1,engineer 3,Hardware Technology
+2Tech 4,Tech 1,engineer 3,Hardware Technology
+2Tech 5,Tech 1,engineer 3,Hardware Technology
+2Finance 1,Finance 3,manager,Finance
+2Finance 2,Finance 3,manager,Finance
+2Finance 3,Finance 3,manager,Finance
+2Finance 4,Finance 3,manager,Finance
+2HR 1,HR 3,manager,HR
+2Tech 21,Tech 2,engineer 3,Software Technology
+2Tech 22,Tech 2,engineer 3,Software Technology
+2Tech 23,Tech 2,engineer 3,Software Technology
+2Tech 24,Tech 2,engineer 3,Software Technology
+2Tech 25,Tech 2,engineer 3,Software Technology
+2Finance 21,Finance 4,manager,Finance
+Tech X,Tech 415,engineer 3,Technology
+Tech X2,Tech 415,engineer 3,Firmware Technology
+Tech X3,Tech 415,engineer 3,Hardware Technology
