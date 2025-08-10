@@ -1,0 +1,501 @@
+employee,manager,role,team
+CEO,,Executive,Management
+COO,CEO,COO,Operations
+CFO,CEO,CFO,Finance
+CTO,CEO,CTO,Software
+CPO,CEO,CPO,Product
+CMO,CEO,CMO,Marketing
+CHRO,CEO,CHRO,HR
+CIO,CEO,CIO,IT
+GC,CEO,GC,Legal
+CISO,CEO,CISO,Security
+CRO,CEO,CRO,Sales
+SVP Supply Chain,CEO,SVP Supply Chain,Supply Chain
+SVP Manufacturing,CEO,SVP Manufacturing,Manufacturing
+SVP Customer,CEO,SVP Customer,Customer Success
+VP Hardware,CEO,VP Hardware,Hardware
+VP Data,CEO,VP Data,Data
+VP Platform,CEO,VP Platform,Platform
+VP Infrastructure,CEO,VP Infrastructure,Infrastructure
+VP Support,CEO,VP Support,Support
+VP Design,CEO,VP Design,Design
+VP Tax,CEO,VP Tax,Tax
+Skye Khan,COO,Director of Operations,Operations
+Ren Miller,COO,Director of Operations,Operations
+Lucia Gonzalez,Skye Khan,Operations Manager,Operations
+Henry Lin,Skye Khan,Operations Manager,Operations
+Andrés Ramirez,Ren Miller,Operations Manager,Operations
+Riley Lopez,Ren Miller,Operations Manager,Operations
+Grace Rodriguez,Lucia Gonzalez,Operations Manager,Operations
+Parker Chen,Lucia Gonzalez,Business Operations Analyst,Operations
+Quinn Zhang,Lucia Gonzalez,Operations Manager,Operations
+Sidney Lin,Lucia Gonzalez,Operations Manager,Operations
+Raj Lin,Lucia Gonzalez,Business Operations Analyst,Operations
+Morgan Lewis,Lucia Gonzalez,Operations Manager,Operations
+Ananya Moore,Lucia Gonzalez,Business Operations Analyst,Operations
+Sasha Choi,Henry Lin,Operations Manager,Operations
+Raj Flores,Henry Lin,Workplace Coordinator,Operations
+Min White,Henry Lin,Operations Manager,Operations
+Arjun Liu,Henry Lin,Workplace Coordinator,Operations
+Blake Mitchell,Henry Lin,Operations Manager,Operations
+Priya Rodriguez,Henry Lin,Workplace Coordinator,Operations
+Quinn Zhao,Henry Lin,Operations Manager,Operations
+Min Park,Andrés Ramirez,Business Operations Analyst,Operations
+Ethan Bose,Andrés Ramirez,Workplace Coordinator,Operations
+Aria Campbell,Andrés Ramirez,Business Operations Analyst,Operations
+Olivia White,Andrés Ramirez,Workplace Coordinator,Operations
+Olivia Hernandez,Andrés Ramirez,Workplace Coordinator,Operations
+Amelia Kim,Andrés Ramirez,Business Operations Analyst,Operations
+Levi Iyer,Andrés Ramirez,Business Operations Analyst,Operations
+Cameron Thomas,Riley Lopez,Workplace Coordinator,Operations
+Grace Perez,Riley Lopez,Business Operations Analyst,Operations
+Skye Kobayashi,Riley Lopez,Business Operations Analyst,Operations
+Avery Martinez,Riley Lopez,Workplace Coordinator,Operations
+Raj Green,Riley Lopez,Business Operations Analyst,Operations
+Hana Hall,Riley Lopez,Workplace Coordinator,Operations
+Diego Lin,Riley Lopez,Business Operations Analyst,Operations
+Jamie Lopez,Riley Lopez,Business Operations Analyst,Operations
+Suki Rodriguez,CFO,Director of Finance,Finance
+Quinn Flores,CFO,Director of Finance,Finance
+Min Iyer,Suki Rodriguez,Finance Manager,Finance
+Isabella Roberts,Suki Rodriguez,Finance Manager,Finance
+Mei Hall,Suki Rodriguez,Finance Manager,Finance
+Jordan Bose,Suki Rodriguez,Finance Manager,Finance
+Elijah Perez,Suki Rodriguez,Finance Manager,Finance
+Rohan Anderson,Suki Rodriguez,Finance Manager,Finance
+Quinn Ramirez,Quinn Flores,Finance Manager,Finance
+Isabella Taylor,Quinn Flores,Finance Manager,Finance
+Olivia Khan,Quinn Flores,Finance Manager,Finance
+Chloe Tanaka,Quinn Flores,Finance Manager,Finance
+Drew Perez,Quinn Flores,Finance Manager,Finance
+Lily Chen,Min Iyer,FP&A Manager,Finance
+Reese Gupta,Min Iyer,FP&A Manager,Finance
+Grace Rivera,Min Iyer,Payroll Specialist,Finance
+Shannon Martin,Min Iyer,Financial Analyst,Finance
+Micah Martin,Min Iyer,Senior Financial Analyst,Finance
+Aiko Robinson,Min Iyer,Financial Analyst,Finance
+Mateus Huang,Min Iyer,Senior Financial Analyst,Finance
+Isabella Smith,Isabella Roberts,Senior Financial Analyst,Finance
+Grace Park,Isabella Roberts,FP&A Manager,Finance
+Rohan Zhang,Isabella Roberts,FP&A Manager,Finance
+Elliot Suzuki,Isabella Roberts,Financial Analyst,Finance
+Aria Wang,Isabella Roberts,Payroll Specialist,Finance
+Chloe Singh,Isabella Roberts,Payroll Specialist,Finance
+Santiago Singh,Mei Hall,Financial Analyst,Finance
+Blake Rodriguez,Mei Hall,Senior Financial Analyst,Finance
+Scarlett Lee,Mei Hall,Financial Analyst,Finance
+Levi Chang,Mei Hall,Financial Analyst,Finance
+Alex Zhang,Jordan Bose,Senior Financial Analyst,Finance
+Henry Li,Jordan Bose,Financial Analyst,Finance
+Cameron Clark,Jordan Bose,Payroll Specialist,Finance
+Skye Allen,Jordan Bose,FP&A Manager,Finance
+Henry Yamamoto,Elijah Perez,Financial Analyst,Finance
+Rowan Kobayashi,Elijah Perez,Payroll Specialist,Finance
+Santiago Sato,Elijah Perez,FP&A Manager,Finance
+Drew Jackson,Elijah Perez,Financial Analyst,Finance
+Levi King,Elijah Perez,Payroll Specialist,Finance
+Hana Lee,Elijah Perez,Financial Analyst,Finance
+Kendall Kim,Elijah Perez,FP&A Manager,Finance
+Casey Kim,Elijah Perez,FP&A Manager,Finance
+Parker King,Rohan Anderson,FP&A Manager,Finance
+Remy Rivera,Rohan Anderson,Senior Financial Analyst,Finance
+Lucia Choi,Rohan Anderson,FP&A Manager,Finance
+Yuki Lewis,Rohan Anderson,Senior Financial Analyst,Finance
+Noah Singh,Rohan Anderson,Senior Financial Analyst,Finance
+Shawn Nakamura,Rohan Anderson,Payroll Specialist,Finance
+Elijah Brown,Rohan Anderson,Financial Analyst,Finance
+Sophia Yamamoto,Rohan Anderson,FP&A Manager,Finance
+Blake Wu,Rohan Anderson,FP&A Manager,Finance
+Benjamin Campbell,Quinn Ramirez,Financial Analyst,Finance
+Sidney Wilson,Quinn Ramirez,Senior Financial Analyst,Finance
+Mateo Sanchez,Quinn Ramirez,FP&A Manager,Finance
+Kendall Sato,Quinn Ramirez,Financial Analyst,Finance
+Santiago Hall,Quinn Ramirez,Financial Analyst,Finance
+Aiko Thomas,Quinn Ramirez,Payroll Specialist,Finance
+Shawn Sato,Quinn Ramirez,Senior Financial Analyst,Finance
+Yuki Nelson,Isabella Taylor,Financial Analyst,Finance
+Chloe Bose,Isabella Taylor,Payroll Specialist,Finance
+Drew Lee,Isabella Taylor,Senior Financial Analyst,Finance
+Elliot Brown,Isabella Taylor,Senior Financial Analyst,Finance
+Isha Bose,Isabella Taylor,Senior Financial Analyst,Finance
+Rohan Chang,Isabella Taylor,Payroll Specialist,Finance
+Aiko Hall,Isabella Taylor,Senior Financial Analyst,Finance
+Priya Taylor,Olivia Khan,Financial Analyst,Finance
+Taylor Wilson,Olivia Khan,Senior Financial Analyst,Finance
+Nora Harris,Olivia Khan,Senior Financial Analyst,Finance
+Casey Allen,Olivia Khan,Senior Financial Analyst,Finance
+Mia Watanabe,Olivia Khan,Senior Financial Analyst,Finance
+Isha Adams,Olivia Khan,FP&A Manager,Finance
+Elena Shah,Olivia Khan,Senior Financial Analyst,Finance
+Quinn Rivera,Olivia Khan,Payroll Specialist,Finance
+Arjun Nakamura,Chloe Tanaka,Payroll Specialist,Finance
+Andrés Taylor,Chloe Tanaka,Senior Financial Analyst,Finance
+Camila Suzuki,Chloe Tanaka,Financial Analyst,Finance
+Scarlett White,Chloe Tanaka,Financial Analyst,Finance
+Skye Thompson,Chloe Tanaka,Senior Financial Analyst,Finance
+Mateo Zhao,Chloe Tanaka,Financial Analyst,Finance
+Ananya Davis,Chloe Tanaka,FP&A Manager,Finance
+Min Nakamura,Chloe Tanaka,Payroll Specialist,Finance
+Logan Wang,Chloe Tanaka,Financial Analyst,Finance
+Blake Scott,Drew Perez,Financial Analyst,Finance
+Devon Watanabe,Drew Perez,Payroll Specialist,Finance
+Ananya Brown,Drew Perez,Financial Analyst,Finance
+Scarlett Adams,Drew Perez,Senior Financial Analyst,Finance
+Hana Scott,Drew Perez,Payroll Specialist,Finance
+Lucia Sato,CTO,Director of Software,Software
+Andrés Young,CTO,Director of Software,Software
+Suki Nakamura,CTO,Director of Software,Software
+Ananya Sanchez,Lucia Sato,Software Manager,Software
+Layla Moore,Lucia Sato,Software Manager,Software
+Grace Thomas,Lucia Sato,Software Manager,Software
+Chloe Das,Lucia Sato,Software Manager,Software
+Cameron Walker,Andrés Young,Software Manager,Software
+Zoe Martinez,Andrés Young,Software Manager,Software
+Harley Hill,Andrés Young,Software Manager,Software
+Emery Martin,Andrés Young,Software Manager,Software
+Sasha Allen,Suki Nakamura,Software Manager,Software
+Reese Bose,Suki Nakamura,Software Manager,Software
+Sidney Gonzalez,Suki Nakamura,Software Manager,Software
+Chloe Kobayashi,Suki Nakamura,Software Manager,Software
+Mei Lewis,Ananya Sanchez,SWE 2,Software
+Nora Suzuki,Ananya Sanchez,QA Engineer,Software
+Levi Shah,Ananya Sanchez,SWE 2,Software
+Elijah Green,Ananya Sanchez,SWE 1,Software
+Henry Williams,Ananya Sanchez,SWE 3,Software
+Aria Das,Layla Moore,SRE,Software
+Jordan Roberts,Layla Moore,SWE 3,Software
+Valentina Zhao,Layla Moore,SWE 3,Software
+Sofia Rodriguez,Layla Moore,SWE 1,Software
+Shannon Wilson,Layla Moore,SWE 1,Software
+Emma Wright,Layla Moore,SWE 1,Software
+Hayden Wright,Layla Moore,SWE 2,Software
+Zoe King,Layla Moore,QA Engineer,Software
+Lucia Suzuki,Grace Thomas,DevOps Engineer,Software
+Diego Adams,Grace Thomas,SWE 1,Software
+Sophia Davis,Grace Thomas,SRE,Software
+Hayden Kumar,Grace Thomas,SWE 1,Software
+Ava Williams,Grace Thomas,SRE,Software
+Emma Hernandez,Chloe Das,DevOps Engineer,Software
+Sidney Rodriguez,Chloe Das,SWE 3,Software
+Emery Chowdhury,Chloe Das,SWE 1,Software
+Levi Chen,Chloe Das,QA Engineer,Software
+Kiran Taylor,Cameron Walker,SWE 1,Software
+Camila Walker,Cameron Walker,SWE 1,Software
+Kai King,Cameron Walker,SWE 1,Software
+Hayden Sanchez,Cameron Walker,SWE 3,Software
+Hiro Flores,Cameron Walker,DevOps Engineer,Software
+Kendall Nguyen,Cameron Walker,QA Engineer,Software
+Jin Thompson,Zoe Martinez,SWE 3,Software
+Benjamin Williams,Zoe Martinez,SWE 3,Software
+Riley Johnson,Zoe Martinez,SWE 1,Software
+Andrés Chen,Zoe Martinez,SWE 2,Software
+Sofia Yamamoto,Zoe Martinez,SWE 2,Software
+Layla Wilson,Zoe Martinez,SRE,Software
+Ren Gupta,Zoe Martinez,SRE,Software
+Diego Choi,Zoe Martinez,QA Engineer,Software
+Harper Ramirez,Harley Hill,SWE 2,Software
+Levi Sanchez,Harley Hill,SRE,Software
+Yuki Moore,Harley Hill,QA Engineer,Software
+Benjamin Miller,Harley Hill,SWE 2,Software
+Taylor Martinez,Harley Hill,SRE,Software
+Liam Gupta,Harley Hill,SWE 2,Software
+Quinn Hernandez,Harley Hill,SRE,Software
+Jack Watanabe,Harley Hill,SRE,Software
+Neha Young,Emery Martin,SRE,Software
+Mia Garcia,Emery Martin,QA Engineer,Software
+Hayden Lee,Emery Martin,SWE 3,Software
+Layla Smith,Emery Martin,SWE 3,Software
+Henry Nelson,Emery Martin,DevOps Engineer,Software
+Lucas Young,Emery Martin,SWE 1,Software
+Harley Rivera,Sasha Allen,SWE 2,Software
+Alex Nelson,Sasha Allen,QA Engineer,Software
+Drew Yamamoto,Sasha Allen,SWE 3,Software
+Andrés Sanchez,Sasha Allen,SWE 2,Software
+Andrés Smith,Sasha Allen,SWE 1,Software
+Emma Lopez,Sasha Allen,SWE 2,Software
+Isha Garcia,Reese Bose,QA Engineer,Software
+Jordan Hill,Reese Bose,SWE 3,Software
+Hiro Robinson,Reese Bose,SWE 1,Software
+Arjun Kim,Reese Bose,SWE 2,Software
+Aiko Chang,Reese Bose,QA Engineer,Software
+Lucas Tanaka,Reese Bose,SWE 2,Software
+Isabella Zhao,Reese Bose,SRE,Software
+Avery Suzuki,Sidney Gonzalez,SRE,Software
+Zoe Watanabe,Sidney Gonzalez,SWE 2,Software
+Camila Watanabe,Sidney Gonzalez,DevOps Engineer,Software
+Jordan Lin,Sidney Gonzalez,SRE,Software
+Min Robinson,Sidney Gonzalez,SWE 1,Software
+Avery Moore,Chloe Kobayashi,SRE,Software
+Henry Wilson,Chloe Kobayashi,QA Engineer,Software
+Layla Wang,Chloe Kobayashi,SWE 1,Software
+Hiro Williams,Chloe Kobayashi,SRE,Software
+Min Young,CPO,Director of Product,Product
+Mateus King,CPO,Director of Product,Product
+Alex Chowdhury,CPO,Director of Product,Product
+Andrés Park,Min Young,Product Manager,Product
+Parker Kim,Min Young,Product Manager,Product
+Mateo Allen,Mateus King,Product Manager,Product
+Cameron King,Mateus King,Product Manager,Product
+Kendall Robinson,Alex Chowdhury,Product Manager,Product
+Ren Chowdhury,Alex Chowdhury,Product Manager,Product
+Diego Carter,Alex Chowdhury,Product Manager,Product
+Santiago Torres,Andrés Park,Product Manager 1,Product
+Rohan Sanchez,Andrés Park,Product Manager 1,Product
+Neha Jackson,Andrés Park,Product Manager 3,Product
+Liam Hill,Andrés Park,Product Manager 2,Product
+Santiago Davis,Parker Kim,Program Manager,Product
+Ava Gonzalez,Parker Kim,Product Manager 2,Product
+Jin Kobayashi,Parker Kim,Product Manager 3,Product
+Valentina Torres,Parker Kim,Program Manager,Product
+Mila Thomas,Mateo Allen,Product Manager 2,Product
+Harper Hernandez,Mateo Allen,Program Manager,Product
+Jordan Nguyen,Mateo Allen,Program Manager,Product
+Cameron Watanabe,Mateo Allen,Program Manager,Product
+Ava Roberts,Mateo Allen,Product Manager 2,Product
+Kendall Martinez,Mateo Allen,Product Manager 1,Product
+Sasha Kim,Mateo Allen,Product Manager 3,Product
+Elliot Wu,Cameron King,Product Manager 3,Product
+Rowan Campbell,Cameron King,Product Manager 2,Product
+Diego Kobayashi,Cameron King,Program Manager,Product
+Casey Lee,Cameron King,Product Manager 1,Product
+Mateus Iyer,Cameron King,Program Manager,Product
+Amelia Jackson,Cameron King,Program Manager,Product
+Jack Green,Kendall Robinson,Product Manager 1,Product
+Mason Smith,Kendall Robinson,Product Manager 3,Product
+Levi Khan,Kendall Robinson,Product Manager 1,Product
+Shawn Johnson,Kendall Robinson,Product Manager 3,Product
+Liam Mitchell,Kendall Robinson,Product Manager 1,Product
+Chloe Roberts,Kendall Robinson,Product Manager 1,Product
+Zoe Scott,Ren Chowdhury,Product Manager 1,Product
+Sophia Wilson,Ren Chowdhury,Product Manager 1,Product
+Aiko Torres,Ren Chowdhury,Product Manager 2,Product
+Olivia Wright,Ren Chowdhury,Program Manager,Product
+Sofia Green,Ren Chowdhury,Product Manager 2,Product
+Sebastian Kumar,Ren Chowdhury,Product Manager 1,Product
+Hiro Singh,Diego Carter,Product Manager 2,Product
+Drew Miller,Diego Carter,Program Manager,Product
+Layla Li,Diego Carter,Product Manager 2,Product
+Sora Torres,Diego Carter,Program Manager,Product
+Morgan Chen,Diego Carter,Product Manager 2,Product
+Remy Yamamoto,Diego Carter,Program Manager,Product
+Levi Torres,Diego Carter,Product Manager 3,Product
+Liam King,Diego Carter,Program Manager,Product
+Ren Walker,Diego Carter,Product Manager 3,Product
+Santiago Wang,Diego Carter,Program Manager,Product
+Remy Lee,CMO,Director of Marketing,Marketing
+Kendall Watanabe,Remy Lee,Marketing Manager,Marketing
+Diego Chen,Remy Lee,Marketing Manager,Marketing
+Layla Nelson,Kendall Watanabe,Growth Marketer,Marketing
+Zoe Moore,Kendall Watanabe,Demand Gen Manager,Marketing
+Blake Young,Kendall Watanabe,Marketing Manager,Marketing
+Micah Baker,Kendall Watanabe,Demand Gen Manager,Marketing
+Parker Green,Kendall Watanabe,Content Strategist,Marketing
+Emma Zhang,Diego Chen,Content Strategist,Marketing
+Jordan Patel,Diego Chen,Growth Marketer,Marketing
+Ella Kim,Diego Chen,Content Strategist,Marketing
+Jack Wright,Diego Chen,SEO Specialist,Marketing
+Quinn Tanaka,Diego Chen,SEO Specialist,Marketing
+Raj Campbell,Diego Chen,Content Strategist,Marketing
+Andrés Kim,CHRO,Director of HR,HR
+Hiro Ramirez,CHRO,Director of HR,HR
+Parker Wright,CHRO,Director of HR,HR
+Daniel Singh,Andrés Kim,HR Manager,HR
+Sora Iyer,Andrés Kim,HR Manager,HR
+Nora Flores,Andrés Kim,HR Manager,HR
+Elliot Jones,Hiro Ramirez,HR Manager,HR
+Zoe Yamamoto,Hiro Ramirez,HR Manager,HR
+Mateus Smith,Parker Wright,HR Manager,HR
+Cameron Khan,Parker Wright,HR Manager,HR
+Camila Bose,Parker Wright,HR Manager,HR
+Layla Young,Parker Wright,HR Manager,HR
+Logan Lewis,Parker Wright,HR Manager,HR
+Skye Martin,Parker Wright,HR Manager,HR
+Min Wilson,Daniel Singh,Comp & Benefits Analyst,HR
+Drew Chen,Daniel Singh,HR Generalist,HR
+Alex Taylor,Daniel Singh,Recruiter,HR
+Aarav Jones,Daniel Singh,People Ops Manager,HR
+Elliot Allen,Daniel Singh,Comp & Benefits Analyst,HR
+Suki Anderson,Daniel Singh,HR Generalist,HR
+Cameron Hill,Daniel Singh,Recruiter,HR
+Daniel King,Daniel Singh,Recruiter,HR
+Neha Smith,Sora Iyer,HR Generalist,HR
+Lucia Hill,Sora Iyer,Comp & Benefits Analyst,HR
+Sophia Green,Sora Iyer,Recruiter,HR
+Mateo Kim,Sora Iyer,Recruiter,HR
+Priya Young,Sora Iyer,HR Generalist,HR
+Ella Flores,Sora Iyer,HR Generalist,HR
+Jordan Harris,Sora Iyer,Comp & Benefits Analyst,HR
+Jin Shah,Sora Iyer,HR Generalist,HR
+Liam Robinson,Sora Iyer,Comp & Benefits Analyst,HR
+Sebastian Robinson,Sora Iyer,Comp & Benefits Analyst,HR
+Suki Baker,Nora Flores,Comp & Benefits Analyst,HR
+Henry Khan,Nora Flores,Recruiter,HR
+Alex Nguyen,Nora Flores,HR Generalist,HR
+Kendall Tanaka,Nora Flores,Recruiter,HR
+Blake Robinson,Elliot Jones,Comp & Benefits Analyst,HR
+Sidney King,Elliot Jones,People Ops Manager,HR
+Logan Zhao,Elliot Jones,Comp & Benefits Analyst,HR
+Rohan White,Elliot Jones,Recruiter,HR
+Mateus Shah,Elliot Jones,HR Generalist,HR
+Chloe Miller,Elliot Jones,Recruiter,HR
+Grace Miller,Zoe Yamamoto,HR Generalist,HR
+Hayden Khan,Zoe Yamamoto,Comp & Benefits Analyst,HR
+Ethan Anderson,Zoe Yamamoto,HR Generalist,HR
+Remy Nelson,Zoe Yamamoto,Recruiter,HR
+Ren Kim,Mateus Smith,Comp & Benefits Analyst,HR
+Riley Flores,Mateus Smith,Comp & Benefits Analyst,HR
+Sebastian Nelson,Mateus Smith,Comp & Benefits Analyst,HR
+Remy Wilson,Mateus Smith,HR Generalist,HR
+Drew Scott,Mateus Smith,HR Generalist,HR
+Ananya Clark,Cameron Khan,Comp & Benefits Analyst,HR
+Elijah Flores,Cameron Khan,Comp & Benefits Analyst,HR
+Parker Miller,Cameron Khan,Comp & Benefits Analyst,HR
+Shawn Mitchell,Cameron Khan,Comp & Benefits Analyst,HR
+Blake Adams,Cameron Khan,People Ops Manager,HR
+Mateo Brown,Cameron Khan,Comp & Benefits Analyst,HR
+Avery Carter,Camila Bose,HR Generalist,HR
+Mila Rodriguez,Camila Bose,HR Generalist,HR
+Liam Harris,Camila Bose,HR Generalist,HR
+Amit Baker,Camila Bose,People Ops Manager,HR
+Ava Nelson,Camila Bose,HR Generalist,HR
+Hana Green,Layla Young,People Ops Manager,HR
+Amelia Smith,Layla Young,HR Generalist,HR
+Casey Robinson,Layla Young,HR Generalist,HR
+Mateo Bose,Layla Young,Comp & Benefits Analyst,HR
+Diego Taylor,Layla Young,Comp & Benefits Analyst,HR
+Hayden Johnson,Layla Young,People Ops Manager,HR
+Hana Martin,Logan Lewis,Recruiter,HR
+Lucas Green,Logan Lewis,Comp & Benefits Analyst,HR
+Henry Chang,Logan Lewis,HR Generalist,HR
+Sofia Sanchez,Logan Lewis,Comp & Benefits Analyst,HR
+Kai Young,Logan Lewis,Comp & Benefits Analyst,HR
+Jamie Jones,Logan Lewis,Comp & Benefits Analyst,HR
+Priya Choi,Logan Lewis,People Ops Manager,HR
+Kai Kumar,Logan Lewis,HR Generalist,HR
+Kiran Hernandez,Logan Lewis,Recruiter,HR
+Devon Shah,Logan Lewis,Comp & Benefits Analyst,HR
+Layla Thompson,Skye Martin,Recruiter,HR
+Reese Shah,Skye Martin,Comp & Benefits Analyst,HR
+Kiran Walker,Skye Martin,HR Generalist,HR
+Mia Nguyen,Skye Martin,People Ops Manager,HR
+Aarav Wright,Skye Martin,People Ops Manager,HR
+Shawn Das,Skye Martin,Recruiter,HR
+Hayden Young,Skye Martin,Recruiter,HR
+Skye Torres,Skye Martin,Recruiter,HR
+Lucas Rodriguez,Skye Martin,Comp & Benefits Analyst,HR
+Olivia Watanabe,CIO,Director of IT,IT
+Camila Robinson,CIO,Director of IT,IT
+Ren Bose,Olivia Watanabe,IT Manager,IT
+Riley Wilson,Olivia Watanabe,IT Manager,IT
+Mateo Robinson,Camila Robinson,IT Manager,IT
+Layla Mitchell,Camila Robinson,IT Manager,IT
+Mia Robinson,Ren Bose,IT Support Specialist,IT
+Morgan Harris,Ren Bose,Systems Administrator,IT
+Cameron Mitchell,Ren Bose,Systems Administrator,IT
+Layla Wu,Ren Bose,Network Administrator,IT
+Mei Smith,Riley Wilson,IT Support Specialist,IT
+Yuki Chang,Riley Wilson,Network Administrator,IT
+Harley Jones,Riley Wilson,Network Administrator,IT
+Levi Jackson,Riley Wilson,IT Support Specialist,IT
+Kendall Allen,Riley Wilson,IT Support Specialist,IT
+Neha Clark,Riley Wilson,IT Support Specialist,IT
+Lucas Patel,Riley Wilson,Network Administrator,IT
+Hayden Zhao,Riley Wilson,Network Administrator,IT
+Riley Tanaka,Riley Wilson,IT Analyst,IT
+Jamie Patel,Riley Wilson,IT Support Specialist,IT
+Chloe Chen,Mateo Robinson,Systems Administrator,IT
+Yuki Park,Mateo Robinson,IT Support Specialist,IT
+Ren Lee,Mateo Robinson,IT Analyst,IT
+Suki Wright,Mateo Robinson,IT Analyst,IT
+Isabella Flores,Mateo Robinson,IT Analyst,IT
+Morgan Flores,Mateo Robinson,Network Administrator,IT
+Grace Shah,Mateo Robinson,IT Support Specialist,IT
+Henry Sanchez,Mateo Robinson,IT Analyst,IT
+Lily Clark,Mateo Robinson,IT Support Specialist,IT
+Nora Lee,Mateo Robinson,IT Analyst,IT
+Parker Singh,Layla Mitchell,Network Administrator,IT
+Aria Lee,Layla Mitchell,Systems Administrator,IT
+Taylor Miller,Layla Mitchell,Systems Administrator,IT
+Sora Khan,Layla Mitchell,IT Support Specialist,IT
+Kiran Mitchell,GC,Director of Legal,Legal
+Andrés Perez,GC,Director of Legal,Legal
+Sasha Hall,GC,Director of Legal,Legal
+Kai Nakamura,Kiran Mitchell,Legal Manager,Legal
+Remy Rodriguez,Kiran Mitchell,Legal Manager,Legal
+Logan Roberts,Kiran Mitchell,Legal Manager,Legal
+Mateus Sanchez,Kiran Mitchell,Legal Manager,Legal
+Elliot Garcia,Andrés Perez,Legal Manager,Legal
+Santiago Green,Andrés Perez,Legal Manager,Legal
+Morgan Wu,Andrés Perez,Legal Manager,Legal
+Yuki Roberts,Andrés Perez,Legal Manager,Legal
+Kiran Lee,Sasha Hall,Legal Manager,Legal
+Kiran Singh,Sasha Hall,Legal Manager,Legal
+Shawn Yamamoto,Kai Nakamura,Legal Counsel,Legal
+Aarav Ramirez,Kai Nakamura,Legal Counsel,Legal
+Lily Nakamura,Kai Nakamura,Legal Counsel,Legal
+Daniel Rivera,Kai Nakamura,Legal Counsel,Legal
+Skye Young,Kai Nakamura,Contracts Manager,Legal
+Blake Garcia,Kai Nakamura,Contracts Manager,Legal
+Jin Jones,Kai Nakamura,Contracts Manager,Legal
+Lucas Thomas,Kai Nakamura,Paralegal,Legal
+Aria Chen,Remy Rodriguez,Contracts Manager,Legal
+Harper Shah,Remy Rodriguez,Paralegal,Legal
+Arjun Young,Remy Rodriguez,Paralegal,Legal
+Daniel Mitchell,Remy Rodriguez,Paralegal,Legal
+Andrés Das,Remy Rodriguez,Legal Counsel,Legal
+Jordan Smith,Remy Rodriguez,Contracts Manager,Legal
+Mateus Bose,Remy Rodriguez,Legal Counsel,Legal
+Layla Zhao,Remy Rodriguez,Paralegal,Legal
+Micah Yamamoto,Logan Roberts,Paralegal,Legal
+Logan Rodriguez,Logan Roberts,Legal Counsel,Legal
+Elijah Gupta,Logan Roberts,Paralegal,Legal
+Parker Das,Logan Roberts,Contracts Manager,Legal
+Sofia Garcia,Logan Roberts,Legal Counsel,Legal
+Yuki Taylor,Logan Roberts,Legal Counsel,Legal
+Ethan Suzuki,Logan Roberts,Legal Counsel,Legal
+Morgan Watanabe,Logan Roberts,Paralegal,Legal
+Ren Moore,Logan Roberts,Legal Counsel,Legal
+Jamie Li,Logan Roberts,Contracts Manager,Legal
+Rowan Harris,Mateus Sanchez,Legal Counsel,Legal
+Mateus Torres,Mateus Sanchez,Legal Counsel,Legal
+Min Lewis,Mateus Sanchez,Legal Counsel,Legal
+Benjamin Li,Mateus Sanchez,Paralegal,Legal
+Kai Adams,Mateus Sanchez,Contracts Manager,Legal
+Sophia Chowdhury,Mateus Sanchez,Legal Counsel,Legal
+Liam Watanabe,Mateus Sanchez,Paralegal,Legal
+Kendall Huang,Mateus Sanchez,Paralegal,Legal
+Rohan Watanabe,Mateus Sanchez,Legal Counsel,Legal
+Sebastian Jones,Elliot Garcia,Legal Counsel,Legal
+Hayden Singh,Elliot Garcia,Legal Counsel,Legal
+Yuki Scott,Elliot Garcia,Contracts Manager,Legal
+Lucas Carter,Elliot Garcia,Legal Counsel,Legal
+Emma Anderson,Elliot Garcia,Contracts Manager,Legal
+Morgan Campbell,Elliot Garcia,Paralegal,Legal
+Valentina Lin,Santiago Green,Contracts Manager,Legal
+Logan Allen,Santiago Green,Contracts Manager,Legal
+Hiro Khan,Santiago Green,Contracts Manager,Legal
+Sebastian King,Santiago Green,Paralegal,Legal
+Sebastian Liu,Santiago Green,Legal Counsel,Legal
+Drew Das,Santiago Green,Legal Counsel,Legal
+Micah Li,Santiago Green,Contracts Manager,Legal
+Morgan Nguyen,Santiago Green,Contracts Manager,Legal
+Harper Lin,Morgan Wu,Contracts Manager,Legal
+Ethan Smith,Morgan Wu,Contracts Manager,Legal
+Riley Lewis,Morgan Wu,Legal Counsel,Legal
+Mia Li,Morgan Wu,Contracts Manager,Legal
+Nora Shah,Morgan Wu,Contracts Manager,Legal
+Henry Miller,Morgan Wu,Legal Counsel,Legal
+Shannon Li,Yuki Roberts,Contracts Manager,Legal
+Avery Williams,Yuki Roberts,Legal Counsel,Legal
+Elijah Hill,Yuki Roberts,Legal Counsel,Legal
+Valentina Rivera,Yuki Roberts,Contracts Manager,Legal
+Sidney Patel,Yuki Roberts,Contracts Manager,Legal
+Amelia Huang,Yuki Roberts,Legal Counsel,Legal
+Kendall Campbell,Yuki Roberts,Contracts Manager,Legal
+Mateo Lee,Kiran Lee,Legal Counsel,Legal
+Taylor Young,Kiran Lee,Contracts Manager,Legal
+Skye Iyer,Kiran Lee,Legal Counsel,Legal
+Jamie Jackson,Kiran Lee,Contracts Manager,Legal
+Ava Singh,Kiran Lee,Paralegal,Legal
+Taylor Davis,Kiran Lee,Contracts Manager,Legal
+Ananya Hall,Kiran Lee,Contracts Manager,Legal

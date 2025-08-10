@@ -8,7 +8,7 @@ import dash
 from dash import Dash, dcc, html, Input, Output, State
 import pandas as pd
 import plotly.graph_objs as go
-from plotly.colors import qualitative as pq
+from plotly.colors import sequential as pseq
 
 # -------------------------
 # CSV cleaning (trim trailing whitespace in every textual cell & column name)
@@ -233,7 +233,8 @@ def _quad_bezier_points(p0, p1, pc, steps=28):
         y = mt * mt * p0[1] + 2 * mt * t * pc[1] + t * t * p1[1]
         xs.append(x)
         ys.append(y)
-    xs.append(None); ys.append(None)
+    xs.append(None)
+    ys.append(None)
     return xs, ys
 
 
@@ -282,7 +283,8 @@ def edge_coordinates_with_curves(pos: dict, tree: OrgTree, radius_step: float = 
                 cy = r_ctrl * math.sin(th1)
 
                 xs, ys = _quad_bezier_points((mx, my), (x1, y1), (cx, cy), steps=28)
-                ex += xs; ey += ys
+                ex += xs
+                ey += ys
         else:
             # straight lines (CEO or single-child)
             for child in kids:
@@ -294,41 +296,143 @@ def edge_coordinates_with_curves(pos: dict, tree: OrgTree, radius_step: float = 
 
 
 # -------------------------
-# Color helpers
+# Color helpers — Viridis with semantic grouping
 # -------------------------
-# Build a long qualitative palette by concatenating several Plotly sets.
-PALETTE = []
-for name in ['Plotly','D3','Set1','Set2','Set3','Pastel1','Pastel2','Dark2','Bold','Pastel','Vivid','T10','Alphabet','Safe','Prism','Antique']:
-    if hasattr(pq, name):
-        PALETTE += getattr(pq, name)
+VIRIDIS = pseq.Viridis  # list of hex strings along the viridis colormap
+
+ROLE_GROUPS = [
+    # 0 Tech / Eng / Data (keep DS & SWE close)
+    [
+        'engineer','developer','swe','software','data','data scientist','ml','ai','scientist',
+        'analytics','platform','devops','infra','infrastructure','sre','backend','frontend',
+        'full stack','qa','test','security','research engineer'
+    ],
+    # 1 Product / Design / PM
+    ['product','pm','program','project','designer','design','ux','ui'],
+    # 2 Hardware / Elec / Mech / Firmware / Mfg
+    ['hardware','mechanical','electrical','firmware','manufacturing','industrial','mechatronics'],
+    # 3 Sales / Marketing / GTM / CS
+    ['sales','account','bd','business development','marketing','growth','customer','support','success','partnership','csm','solutions','presales','pre-sales'],
+    # 4 People / HR / Recruiting
+    ['hr','people','recruit','talent','compensation','benefits','payroll'],
+    # 5 Finance / Legal / Tax / Risk
+    ['finance','accounting','fp&a','legal','counsel','tax','audit','compliance','risk','treasury'],
+    # 6 Operations / IT / Facilities / Supply
+    ['operations','ops','supply','logistics','facilities','it','sysadmin','office','procurement','security operations'],
+    # 7 Leadership / Executive
+    ['chief','ceo','cto','cfo','coo','cso','cio','ciso','executive','vp','svp','evp','director','head','lead'],
+    # 8 Science (non-data)
+    ['research','biology','chemistry','physics','lab']
+]
+
+TEAM_GROUPS = [
+    # 0 Software / Data / Platform / Infra (close together)
+    ['software','data','ml','ai','platform','infra','infrastructure','backend','frontend','devops','sre','security','qa','testing'],
+    # 1 Hardware & related
+    ['hardware','firmware','electrical','mechanical','manufacturing','industrial','lab'],
+    # 2 Product / Design
+    ['product','design','ux','ui','research'],
+    # 3 Sales / Marketing / GTM / CS
+    ['sales','marketing','growth','gtm','business development','bd','success','support','customer','solutions'],
+    # 4 People / HR
+    ['hr','people','recruiting','talent'],
+    # 5 Finance / Legal / Tax
+    ['finance','accounting','legal','tax','compliance','audit','risk'],
+    # 6 Operations / IT
+    ['operations','ops','it','facilities','logistics','supply','procurement'],
+    # 7 Management / Exec
+    ['management','executive','leadership']
+]
 
 
-def _category_colors(categories):
-    uniq = []
-    seen = set()
-    # Stable order: None/Unspecified last
-    for c in categories:
-        key = c if c not in [None, ''] else 'Unspecified'
-        if key not in seen:
-            seen.add(key)
-            uniq.append(key)
-    # rotate "Unspecified" to the end if present
-    if 'Unspecified' in uniq:
-        uniq = [u for u in uniq if u != 'Unspecified'] + ['Unspecified']
+def _classify_group(value: str, attr: str) -> int:
+    s = (value or '').lower()
+    groups = ROLE_GROUPS if attr == 'role' else TEAM_GROUPS
+    for gi, keywords in enumerate(groups):
+        for kw in keywords:
+            if kw in s:
+                return gi
+    return len(groups)  # "other"
+
+
+def _sample_viridis(t: float) -> str:
+    t = max(0.0, min(1.0, float(t)))
+    n = len(VIRIDIS)
+    idx = int(round(t * (n - 1)))
+    return VIRIDIS[idx]
+
+
+def _viridis_category_colors(categories: list[str], attr: str) -> dict:
+    # Separate out 'Unspecified'
+    cats = [c for c in categories if c != 'Unspecified']
+    if not cats:
+        return {'Unspecified': '#BDBDBD'}
+
+    # Group present categories
+    present_groups = defaultdict(list)
+    for c in cats:
+        gi = _classify_group(c, attr)
+        present_groups[gi].append(c)
+
+    # Sort groups and their members for stability
+    grouped = [(gi, sorted(members)) for gi, members in sorted(present_groups.items(), key=lambda x: x[0])]
+    g = len(grouped)
+
+    # Allocate disjoint spans across [0,1]
+    pad = 0.04  # padding at both ends
+    total_width = 1.0 - 2 * pad
+    group_width = total_width / max(g, 1)
+    inner_margin = 0.18  # leave space between groups
+    inner_width = group_width * (1 - inner_margin)
+
     cmap = {}
-    for i, cat in enumerate(uniq):
-        cmap[cat] = PALETTE[i % len(PALETTE)] if PALETTE else '#1f77b4'
+    for i, (gi, members) in enumerate(grouped):
+        start = pad + i * group_width + (group_width - inner_width) / 2
+        k = len(members)
+        if k == 1:
+            ts = [start + inner_width * 0.5]
+        else:
+            ts = [start + inner_width * ((j + 0.5) / k) for j in range(k)]
+        for c, t in zip(members, ts):
+            cmap[c] = _sample_viridis(t)
+
+    # Unspecified as neutral gray
+    if 'Unspecified' in categories:
+        cmap['Unspecified'] = '#BDBDBD'
     return cmap
+
+
+# -------------------------
+# Node size helpers — bigger near center, smaller outward
+# -------------------------
+
+def compute_node_sizes(pos: dict[str, tuple[float,float]], min_size: float = 7.0, max_size: float = 22.0) -> dict:
+    """Map each node to a marker size that decreases linearly with radius.
+    Nodes on the CEO ring (r≈0) get max_size; farthest ring gets min_size.
+    """
+    if not pos:
+        return {}
+    radii = [math.hypot(x, y) for (x, y) in pos.values()]
+    rmax = max(radii) if radii else 1.0
+    sizes = {}
+    for n, (x, y) in pos.items():
+        r = math.hypot(x, y)
+        t = 0.0 if rmax == 0 else (r / rmax)
+        sizes[n] = max_size - (max_size - min_size) * t
+    return sizes
 
 
 # -------------------------
 # Plotly figure builder
 # -------------------------
 
-def org_to_figure(tree: OrgTree, pos: dict, df: pd.DataFrame, color_by: str | None):
-    # Edge trace (use curves where appropriate)
+def org_to_figure(tree: OrgTree, pos: dict, df: pd.DataFrame, color_by: str | None, min_size: float, max_size: float):
+    # Edge trace (draw **first** so it stays behind nodes)
     ex, ey = edge_coordinates_with_curves(pos, tree)
-    edge_trace = go.Scatter(x=ex, y=ey, mode='lines', line=dict(width=1, color='#888'), hoverinfo='skip', name='edges', showlegend=False)
+    edge_trace = go.Scatter(
+        x=ex, y=ey, mode='lines', line=dict(width=1, color='#888'),
+        hoverinfo='skip', name='edges', showlegend=False
+    )
 
     # Build metadata lookup (use plain dicts to avoid pandas Series truthiness issues)
     df_local = df.copy()
@@ -352,19 +456,29 @@ def org_to_figure(tree: OrgTree, pos: dict, df: pd.DataFrame, color_by: str | No
     attr = None
     if color_by and color_by.lower() in ['role','team'] and color_by in df_local.columns:
         attr = color_by
-    
+
+    # Compute per-node sizes from radius using UI-controlled range
+    size_map = compute_node_sizes(pos, min_size=min_size, max_size=max_size)
+
     # If no valid attribute, single node trace (NO labels; hover only)
     if attr is None:
-        xs = [pos[n][0] for n in tree.nodes]
-        ys = [pos[n][1] for n in tree.nodes]
-        hovers = [hover_for(n) for n in tree.nodes]
+        nodes_all = list(tree.nodes)
+        xs = [pos[n][0] for n in nodes_all]
+        ys = [pos[n][1] for n in nodes_all]
+        hovers = [hover_for(n) for n in nodes_all]
+        sizes = [size_map.get(n, 10.0) for n in nodes_all]
         node_trace = go.Scatter(
-            x=xs, y=ys, mode='markers', marker=dict(size=10),
-            hoverinfo='text', text=hovers, name='nodes', showlegend=False
+            x=xs, y=ys, mode='markers', marker=dict(size=sizes),
+            hoverinfo='text', text=hovers, name='nodes', showlegend=False,
+            customdata=nodes_all,
         )
         title = 'Radial Organization Chart (rule-based)'
         fig = go.Figure(data=[edge_trace, node_trace])
-        fig.update_layout(title=title, showlegend=False, xaxis=dict(visible=False), yaxis=dict(visible=False), plot_bgcolor='white', margin=dict(l=20,r=20,t=50,b=20))
+        fig.update_layout(
+            title=title, showlegend=False,
+            xaxis=dict(visible=False), yaxis=dict(visible=False),
+            plot_bgcolor='white', margin=dict(l=20,r=20,t=50,b=20), hovermode='closest'
+        )
         fig.update_yaxes(scaleanchor='x', scaleratio=1)
         return fig
 
@@ -379,26 +493,33 @@ def org_to_figure(tree: OrgTree, pos: dict, df: pd.DataFrame, color_by: str | No
             v = str(val)
         cat_vals.setdefault(v, []).append(n)
 
-    # Stable color map
-    cmap = _category_colors(list(cat_vals.keys()))
+    # Viridis mapping with semantic grouping
+    cmap = _viridis_category_colors(list(cat_vals.keys()), attr)
 
-    traces = [edge_trace]
+    traces = [edge_trace]  # edges behind
     for cat in sorted(cat_vals.keys(), key=lambda x: (x=='Unspecified', x)):
         nodes = cat_vals[cat]
         xs = [pos[n][0] for n in nodes]
         ys = [pos[n][1] for n in nodes]
         hovers = [hover_for(n) for n in nodes]
+        sizes = [size_map.get(n, 10.0) for n in nodes]
         traces.append(
             go.Scatter(
                 x=xs, y=ys, mode='markers',
-                marker=dict(size=10, color=cmap[cat]), name=f"{attr.capitalize()}: {cat}",
-                hoverinfo='text', text=hovers,
+                marker=dict(size=sizes, color=cmap.get(cat, '#1f77b4')),
+                name=f"{attr.capitalize()}: {cat}", hoverinfo='text', text=hovers,
+                customdata=nodes,
             )
         )
 
     title = f"Radial Organization Chart (colored by {attr})"
     fig = go.Figure(data=traces)
-    fig.update_layout(showlegend=True, xaxis=dict(visible=False), yaxis=dict(visible=False), plot_bgcolor='white', margin=dict(l=20,r=20,t=50,b=20), title=title)
+    fig.update_layout(
+        showlegend=True,
+        xaxis=dict(visible=False), yaxis=dict(visible=False),
+        plot_bgcolor='white', margin=dict(l=20,r=20,t=50,b=20), title=title,
+        hovermode='closest'
+    )
     fig.update_yaxes(scaleanchor='x', scaleratio=1)
     return fig
 
@@ -489,7 +610,7 @@ app.layout = html.Div([
     html.P([
         "Upload a CSV with columns: employee, manager (CEO has blank manager). ",
         "Optional columns: ", html.Code("role"), " and ", html.Code("team"), ". ",
-        "If you don't upload a file, the app will attempt to read ", html.Code("sample.csv"), " from the current working directory."
+        "If you don't upload a file, the app will attempt to read ", html.Code("sample_250.csv"), " from the current working directory."
     ]),
     dcc.Upload(
         id='upload-data',
@@ -511,7 +632,35 @@ app.layout = html.Div([
         dcc.Dropdown(id='category-filter', options=[], value=[], multi=True, clearable=False, placeholder="Select categories…", style={"maxWidth": "520px"}),
     ], style={"display": "none", "margin": "4px 0 12px"}),
 
-    dcc.Graph(id='org-graph', style={'height': '80vh'}),
+    # --- Node size controls ---
+    html.Div([
+        html.Label("Node size range"),
+        html.Div([
+            html.Div([
+                html.Div("Max size"),
+                dcc.Slider(id='max-size', min=8, max=40, step=1, value=22, updatemode='drag',
+                           marks={8:'8', 16:'16', 22:'22', 30:'30', 40:'40'}, tooltip={"placement":"bottom"}),
+            ], style={"flex": 1, "marginRight": "12px"}),
+            html.Div([
+                html.Div("Min size"),
+                dcc.Slider(id='min-size', min=3, max=25, step=1, value=7, updatemode='drag',
+                           marks={3:'3', 7:'7', 12:'12', 18:'18', 25:'25'}, tooltip={"placement":"bottom"}),
+            ], style={"flex": 1}),
+        ], style={"display": "flex", "gap": "12px"}),
+    ], style={"margin": "6px 0 10px"}),
+
+    # --- Graph + Stats side-by-side ---
+    html.Div([
+        html.Div([
+            dcc.Graph(id='org-graph', style={'height': '80vh'}),
+        ], style={"flex": 3}),
+        html.Div([
+            html.H4("Statistics"),
+            html.Div(id='overall-stats', style={"marginBottom": "8px"}),
+            html.Hr(),
+            html.Div(id='node-stats'),
+        ], style={"flex": 1, "minWidth": "280px", "borderLeft": "1px solid #eee", "padding": "8px"}),
+    ], style={"display": "flex", "gap": "12px"}),
 
     html.Details([
         html.Summary("Filtered data (debug)"),
@@ -519,6 +668,7 @@ app.layout = html.Div([
     ], open=False, style={"marginTop": "10px"}),
 
     dcc.Store(id='csv-contents'),
+    dcc.Store(id='plot-df-store'),  # filtered/rewired DataFrame for stats callbacks
 ])
 
 
@@ -546,7 +696,7 @@ def populate_category_filter(contents, color_by):
     # Load df
     try:
         if contents is None:
-            df = pd.read_csv('sample.csv')
+            df = pd.read_csv('sample_250.csv')
         else:
             content_type, content_string = contents.split(',')
             decoded = base64.b64decode(content_string)
@@ -570,11 +720,14 @@ def populate_category_filter(contents, color_by):
 @app.callback(
     Output('org-graph', 'figure'),
     Output('debug-df', 'children'),
+    Output('plot-df-store', 'data'),
     Input('csv-contents', 'data'),
     Input('color-by', 'value'),
     Input('category-filter', 'value'),
+    Input('min-size', 'value'),
+    Input('max-size', 'value'),
 )
-def update_figure(contents, color_by, selected_categories):
+def update_figure(contents, color_by, selected_categories, min_size_val, max_size_val):
     def df_to_debug_text(df_: pd.DataFrame, note: str = "") -> str:
         cols = [c for c in ['employee','manager','role','team'] if c in df_.columns]
         head = df_[cols] if cols else df_
@@ -582,15 +735,27 @@ def update_figure(contents, color_by, selected_categories):
         meta = f"Rows: {len(df_)}, Cols: {list(df_.columns)}"
         return (note + "\n" + meta + "\n\n" + text).strip()
 
+    # sanitize size range (ensure min <= max)
+    try:
+        min_s = float(min_size_val) if min_size_val is not None else 7.0
+        max_s = float(max_size_val) if max_size_val is not None else 22.0
+    except Exception:
+        min_s, max_s = 7.0, 22.0
+    if min_s > max_s:
+        min_s, max_s = max_s, min_s
+    # clamp to reasonable bounds
+    min_s = max(1.0, min(60.0, min_s))
+    max_s = max(1.0, min(60.0, max_s))
+
     # read data (uploaded or local sample.csv)
     if contents is None:
         try:
-            df_full = pd.read_csv('sample.csv')
+            df_full = pd.read_csv('sample_250.csv')
         except Exception as e:
             fig = go.Figure()
             msg = f"No upload and failed to read 'sample.csv': {e}"
             fig.update_layout(title=msg)
-            return fig, msg
+            return fig, msg, None
     else:
         try:
             content_type, content_string = contents.split(',')
@@ -600,7 +765,7 @@ def update_figure(contents, color_by, selected_categories):
             fig = go.Figure()
             msg = f"Error reading uploaded CSV: {e}"
             fig.update_layout(title=msg)
-            return fig, msg
+            return fig, msg, None
 
     # Clean trailing whitespace globally on the full dataset
     df_full = clean_trailing_whitespace(df_full)
@@ -614,7 +779,7 @@ def update_figure(contents, color_by, selected_categories):
         msg = f"Data error in full dataset: {e}\n\n" + df_to_debug_text(df_full, note="Full dataset")
         fig.update_layout(title=f"Data error: {e}")
         print(msg)
-        return fig, msg
+        return fig, msg, None
 
     # Normalize color_by
     cb = None if not color_by or color_by == 'none' else color_by
@@ -630,7 +795,7 @@ def update_figure(contents, color_by, selected_categories):
             msg = df_to_debug_text(df_for_plot, note=debug_note + " — result is EMPTY")
             fig.update_layout(title="No nodes to display after filtering.")
             print(msg)  # server log
-            return fig, msg
+            return fig, msg, []
 
     try:
         tree = build_tree_from_df(df_for_plot.copy())
@@ -639,15 +804,91 @@ def update_figure(contents, color_by, selected_categories):
         msg = f"Data error (filtered/rewired): {e}\n\n" + df_to_debug_text(df_for_plot, note=debug_note)
         fig.update_layout(title=f"Data error: {e}")
         print(msg)  # server log
-        return fig, msg
+        return fig, msg, []
 
     pos = radial_layout_rules(tree, radius_step=1.0, depth_lookup=depth_lookup)
 
-    fig = org_to_figure(tree, pos, df_for_plot, cb)
+    fig = org_to_figure(tree, pos, df_for_plot, cb, min_size=min_s, max_size=max_s)
 
-    debug_text = df_to_debug_text(df_for_plot, note=debug_note)
+    debug_text = df_to_debug_text(df_for_plot, note=debug_note + f"\nNode size range: {min_s}–{max_s}")
     print(debug_text)  # also log to console for debugging
-    return fig, debug_text
+
+    # Store filtered DF as records for downstream stats callbacks
+    records = df_for_plot.to_dict(orient='records')
+    return fig, debug_text, records
+
+
+# -------------------------
+# Stats panel callbacks
+# -------------------------
+
+def _depth_counts(tree: OrgTree) -> dict[int, int]:
+    d = tree.depths()
+    counts = defaultdict(int)
+    for depth in d.values():
+        counts[depth] += 1
+    return dict(sorted(counts.items()))
+
+
+@app.callback(
+    Output('overall-stats', 'children'),
+    Output('node-stats', 'children'),
+    Input('plot-df-store', 'data'),
+    Input('org-graph', 'hoverData'),
+)
+def update_stats(records, hoverData):
+    # Overall stats (by current displayed graph)
+    if not records:
+        return html.Div("Load data to see statistics."), html.Div("Hover a node to see details.")
+
+    df = pd.DataFrame(records)
+    try:
+        tree = build_tree_from_df(df.copy())
+    except Exception as e:
+        return html.Div(f"Stats unavailable: {e}"), html.Div()
+
+    counts = _depth_counts(tree)
+    total = sum(counts.values())
+    max_depth = max(counts.keys()) if counts else 0
+
+    overall = html.Div([
+        html.Div(f"Total employees (shown): {total}"),
+        html.Div(f"Max depth: {max_depth}"),
+        html.Table([
+            html.Thead(html.Tr([html.Th("Depth"), html.Th("Count")])) ,
+            html.Tbody([html.Tr([html.Td(d), html.Td(c)]) for d, c in counts.items()])
+        ], style={"marginTop": "6px", "borderCollapse": "collapse", "width": "100%"})
+    ])
+
+    # Hovered node stats
+    if not hoverData or 'points' not in hoverData or not hoverData['points']:
+        node_info = html.Div("Hover a node to see details.")
+        return overall, node_info
+
+    # Pull the employee name from customdata
+    point = hoverData['points'][0]
+    emp = point.get('customdata')
+    if emp is None:
+        node_info = html.Div("Hover a node to see details.")
+        return overall, node_info
+
+    # Compute direct children and total descendants
+    sizes = _subtree_sizes(tree)
+    depths_map = tree.depths()
+    direct = len(tree.children.get(emp, []))
+    descendants = max(0, sizes.get(emp, 1) - 1)
+    depth_val = depths_map.get(emp, None)
+
+    node_info = html.Div([
+        html.Strong(emp),
+        html.Ul([
+            html.Li(f"Depth: {depth_val}"),
+            html.Li(f"Direct reports: {direct}"),
+            html.Li(f"Total descendants: {descendants}"),
+        ])
+    ])
+
+    return overall, node_info
 
 
 if __name__ == '__main__':

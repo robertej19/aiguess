@@ -1,0 +1,251 @@
+employee,manager,role,team
+CEO,,Executive,Management
+COO,CEO,COO,Operations
+CFO,CEO,CFO,Finance
+CTO,CEO,CTO,Software
+CPO,CEO,CPO,Product
+CMO,CEO,CMO,Marketing
+CHRO,CEO,CHRO,HR
+CIO,CEO,CIO,IT
+GC,CEO,GC,Legal
+CISO,CEO,CISO,Security
+CRO,CEO,CRO,Sales
+SVP Supply Chain,CEO,SVP Supply Chain,Supply Chain
+SVP Manufacturing,CEO,SVP Manufacturing,Manufacturing
+SVP Customer,CEO,SVP Customer,Customer Success
+VP Hardware,CEO,VP Hardware,Hardware
+VP Data,CEO,VP Data,Data
+VP Platform,CEO,VP Platform,Platform
+VP Infrastructure,CEO,VP Infrastructure,Infrastructure
+VP Support,CEO,VP Support,Support
+VP Design,CEO,VP Design,Design
+VP Tax,CEO,VP Tax,Tax
+Casey Scott,COO,Director of Operations,Operations
+Sidney Moore,Casey Scott,Operations Manager,Operations
+Jin Choi,Sidney Moore,Operations Manager,Operations
+Isha Kumar,Sidney Moore,Operations Manager,Operations
+Casey Lopez,Sidney Moore,Operations Manager,Operations
+Andrés Wu,CFO,Director of Finance,Finance
+Ananya Sanchez,Andrés Wu,Finance Manager,Finance
+Grace Lewis,Ananya Sanchez,Payroll Specialist,Finance
+Isha Scott,Ananya Sanchez,Financial Analyst,Finance
+Kai Kumar,Ananya Sanchez,FP&A Manager,Finance
+Sophia Martin,Ananya Sanchez,Senior Financial Analyst,Finance
+Levi Wilson,Ananya Sanchez,Financial Analyst,Finance
+Jack Gonzalez,Ananya Sanchez,FP&A Manager,Finance
+Benjamin Wu,Ananya Sanchez,FP&A Manager,Finance
+Aria Park,CTO,Director of Software,Software
+Jack Hernandez,Aria Park,Software Manager,Software
+Mia Zhao,Jack Hernandez,SWE 3,Software
+Raj Harris,Jack Hernandez,SRE,Software
+Jamie Garcia,Jack Hernandez,SRE,Software
+Shannon Nguyen,Jack Hernandez,SWE 1,Software
+Shannon Gonzalez,Jack Hernandez,QA Engineer,Software
+Sophia Chowdhury,Jack Hernandez,SRE,Software
+Henry Lee,Jack Hernandez,SWE 3,Software
+Kendall Wright,CPO,Director of Product,Product
+Suki Martinez,CPO,Director of Product,Product
+Yuki Perez,Kendall Wright,Product Manager,Product
+Lucia Young,Kendall Wright,Product Manager,Product
+Kai Bose,Kendall Wright,Product Manager,Product
+Ava Wang,Suki Martinez,Product Manager,Product
+Sidney Adams,Suki Martinez,Product Manager,Product
+Shannon Jones,Yuki Perez,Product Manager 3,Product
+Lily Wright,Yuki Perez,Product Manager 1,Product
+Harley Zhang,Yuki Perez,Product Manager 3,Product
+Ren Tanaka,Lucia Young,Program Manager,Product
+Sora Chowdhury,Lucia Young,Product Manager 2,Product
+Emma Moore,Lucia Young,Product Manager 2,Product
+Ananya Park,Lucia Young,Product Manager 3,Product
+Zoe Lin,Kai Bose,Program Manager,Product
+Henry Lewis,Kai Bose,Product Manager 2,Product
+Sofia Tanaka,Kai Bose,Product Manager 1,Product
+Morgan Anderson,Kai Bose,Product Manager 2,Product
+Hiro Lee,Kai Bose,Program Manager,Product
+Neha Rodriguez,Kai Bose,Program Manager,Product
+Jack Chang,Kai Bose,Program Manager,Product
+Liam Chen,Ava Wang,Product Manager 1,Product
+Min Anderson,Ava Wang,Product Manager 3,Product
+Sora Baker,Ava Wang,Product Manager 1,Product
+Mia Gupta,Ava Wang,Product Manager 2,Product
+Aria Smith,Ava Wang,Product Manager 3,Product
+Andrés Thompson,Ava Wang,Product Manager 1,Product
+Hiro Hill,Ava Wang,Product Manager 2,Product
+Sebastian Lee,Sidney Adams,Product Manager 1,Product
+Neha Adams,Sidney Adams,Program Manager,Product
+Jordan Anderson,Sidney Adams,Product Manager 3,Product
+Harper Walker,Sidney Adams,Product Manager 1,Product
+Aarav Hernandez,CMO,Director of Marketing,Marketing
+Mateus Rodriguez,Aarav Hernandez,Marketing Manager,Marketing
+Elliot Taylor,Mateus Rodriguez,Growth Marketer,Marketing
+Priya Perez,Mateus Rodriguez,SEO Specialist,Marketing
+Camila Wu,Mateus Rodriguez,Growth Marketer,Marketing
+Harley Choi,Mateus Rodriguez,Content Strategist,Marketing
+Harper Singh,Mateus Rodriguez,SEO Specialist,Marketing
+Scarlett Nakamura,Mateus Rodriguez,Growth Marketer,Marketing
+Emery Young,Mateus Rodriguez,Content Strategist,Marketing
+Levi Williams,CHRO,Director of HR,HR
+Priya Robinson,Levi Williams,HR Manager,HR
+Isha Lewis,Levi Williams,HR Manager,HR
+Alex Martinez,Levi Williams,HR Manager,HR
+Shannon Rodriguez,Priya Robinson,HR Generalist,HR
+Mason Martinez,Priya Robinson,Recruiter,HR
+Sophia Kobayashi,Priya Robinson,Recruiter,HR
+Elliot Liu,Isha Lewis,Comp & Benefits Analyst,HR
+Olivia Yamamoto,Isha Lewis,Comp & Benefits Analyst,HR
+Blake Gonzalez,Isha Lewis,HR Generalist,HR
+Aiko Gupta,Isha Lewis,People Ops Manager,HR
+Zoe Patel,Isha Lewis,Comp & Benefits Analyst,HR
+Morgan Gonzalez,Isha Lewis,HR Generalist,HR
+Lily Baker,Isha Lewis,HR Generalist,HR
+Blake Harris,Alex Martinez,Comp & Benefits Analyst,HR
+Reese Kumar,Alex Martinez,Recruiter,HR
+Sophia Bose,Alex Martinez,Recruiter,HR
+Cameron Das,Alex Martinez,HR Generalist,HR
+Ren Choi,CIO,Director of IT,IT
+Parker Walker,Ren Choi,IT Manager,IT
+Ella Kobayashi,Parker Walker,IT Analyst,IT
+Harley Singh,Parker Walker,IT Support Specialist,IT
+Remy Carter,Parker Walker,IT Support Specialist,IT
+Daniel King,Parker Walker,IT Analyst,IT
+Zoe Wang,GC,Director of Legal,Legal
+Aiko Kobayashi,GC,Director of Legal,Legal
+Blake Nguyen,Zoe Wang,Legal Manager,Legal
+Quinn Lin,Aiko Kobayashi,Legal Manager,Legal
+Quinn Green,Blake Nguyen,Legal Counsel,Legal
+Morgan Lin,Blake Nguyen,Paralegal,Legal
+Andrés Kim,Blake Nguyen,Legal Counsel,Legal
+Quinn Suzuki,Blake Nguyen,Legal Counsel,Legal
+Hayden Rodriguez,Blake Nguyen,Contracts Manager,Legal
+Jamie Walker,Blake Nguyen,Paralegal,Legal
+Emery Zhang,Blake Nguyen,Legal Counsel,Legal
+Neha Garcia,Quinn Lin,Contracts Manager,Legal
+Drew Shah,Quinn Lin,Contracts Manager,Legal
+Arjun Zhang,Quinn Lin,Contracts Manager,Legal
+Ethan King,Quinn Lin,Legal Counsel,Legal
+Mei Green,Quinn Lin,Legal Counsel,Legal
+Emma Khan,Quinn Lin,Legal Counsel,Legal
+Mei Hill,Quinn Lin,Paralegal,Legal
+Cameron Johnson,CISO,Director of Security,Security
+Aria Zhao,CISO,Director of Security,Security
+Devon Martinez,Cameron Johnson,Security Manager,Security
+Lucia Ramirez,Cameron Johnson,Security Manager,Security
+Andrés King,Cameron Johnson,Security Manager,Security
+Benjamin Rodriguez,Aria Zhao,Security Manager,Security
+Sebastian Torres,Devon Martinez,Security Analyst,Security
+Scarlett Choi,Devon Martinez,GRC Analyst,Security
+Rohan Kim,Devon Martinez,Security Engineer,Security
+Mei Chen,Devon Martinez,GRC Analyst,Security
+Reese King,Lucia Ramirez,Security Engineer,Security
+Logan Chen,Lucia Ramirez,Security Analyst,Security
+Ava Torres,Lucia Ramirez,Security Analyst,Security
+Kendall King,Andrés King,Application Security Engineer,Security
+Liam Miller,Andrés King,Security Engineer,Security
+Yuki Kumar,Andrés King,GRC Analyst,Security
+Avery Smith,Andrés King,GRC Analyst,Security
+Elliot King,Andrés King,Security Analyst,Security
+Priya Kumar,Benjamin Rodriguez,Security Engineer,Security
+Rowan Martinez,Benjamin Rodriguez,Security Analyst,Security
+Elena Jones,Benjamin Rodriguez,GRC Analyst,Security
+Arjun Chen,Benjamin Rodriguez,Security Analyst,Security
+Nora Taylor,Benjamin Rodriguez,Security Engineer,Security
+Harper Campbell,Benjamin Rodriguez,Security Engineer,Security
+Kendall Young,CRO,Director of Sales,Sales
+Mei Wilson,CRO,Director of Sales,Sales
+Ananya Patel,Kendall Young,Sales Manager,Sales
+Kiran Martin,Kendall Young,Sales Manager,Sales
+Kai Thompson,Mei Wilson,Sales Manager,Sales
+Casey Thompson,Ananya Patel,Sales Development Rep,Sales
+Ella Young,Ananya Patel,Sales Development Rep,Sales
+Kai Wilson,Ananya Patel,Solutions Engineer,Sales
+Riley Yamamoto,Ananya Patel,Sales Manager,Sales
+Shawn Chowdhury,Ananya Patel,Sales Development Rep,Sales
+Harper Robinson,Ananya Patel,Sales Manager,Sales
+Aiko Harris,Kiran Martin,Solutions Engineer,Sales
+Mason Scott,Kiran Martin,Account Executive,Sales
+Sophia Hall,Kiran Martin,Solutions Engineer,Sales
+Mason Brown,Kai Thompson,Account Executive,Sales
+Emma Thompson,Kai Thompson,Sales Development Rep,Sales
+Riley Wilson,Kai Thompson,Solutions Engineer,Sales
+Benjamin Green,Kai Thompson,Solutions Engineer,Sales
+Amit Suzuki,Kai Thompson,Account Executive,Sales
+Daniel Liu,Kai Thompson,Sales Manager,Sales
+Liam Garcia,Kai Thompson,Solutions Engineer,Sales
+Valentina Park,SVP Supply Chain,Director of Supply Chain,Supply Chain
+Mei Sanchez,Valentina Park,Supply Chain Manager,Supply Chain
+Henry Gupta,Valentina Park,Supply Chain Manager,Supply Chain
+Jamie Nelson,Valentina Park,Supply Chain Manager,Supply Chain
+Ethan Thomas,Mei Sanchez,Buyer,Supply Chain
+Andrés Flores,Mei Sanchez,Inventory Analyst,Supply Chain
+Lucas Singh,Mei Sanchez,Buyer,Supply Chain
+Priya Taylor,Mei Sanchez,Procurement Specialist,Supply Chain
+Grace Carter,Mei Sanchez,Procurement Specialist,Supply Chain
+Rohan Zhang,Mei Sanchez,Buyer,Supply Chain
+Lily Chen,Mei Sanchez,Supply Chain Analyst,Supply Chain
+Isabella Clark,Henry Gupta,Inventory Analyst,Supply Chain
+Arjun Wu,Henry Gupta,Buyer,Supply Chain
+Mila Das,Henry Gupta,Inventory Analyst,Supply Chain
+Jin Ramirez,Henry Gupta,Inventory Analyst,Supply Chain
+Remy Hernandez,Henry Gupta,Buyer,Supply Chain
+Aiko Zhao,Jamie Nelson,Buyer,Supply Chain
+Jin Flores,Jamie Nelson,Procurement Specialist,Supply Chain
+Shawn Jackson,Jamie Nelson,Supply Chain Analyst,Supply Chain
+Avery Young,Jamie Nelson,Inventory Analyst,Supply Chain
+Rohan Martinez,Jamie Nelson,Inventory Analyst,Supply Chain
+Grace Liu,Jamie Nelson,Procurement Specialist,Supply Chain
+Suki Roberts,Jamie Nelson,Inventory Analyst,Supply Chain
+Olivia Jackson,SVP Manufacturing,Director of Manufacturing,Manufacturing
+Ren Smith,SVP Manufacturing,Director of Manufacturing,Manufacturing
+Zoe Lewis,Olivia Jackson,Manufacturing Manager,Manufacturing
+Suki Nakamura,Ren Smith,Manufacturing Manager,Manufacturing
+Morgan Wang,Zoe Lewis,Production Supervisor,Manufacturing
+Emery Chowdhury,Zoe Lewis,Production Supervisor,Manufacturing
+Mila Kim,Zoe Lewis,Quality Engineer,Manufacturing
+Scarlett Li,Zoe Lewis,Process Technician,Manufacturing
+Priya Iyer,Zoe Lewis,Production Supervisor,Manufacturing
+Mateo Iyer,Zoe Lewis,Quality Engineer,Manufacturing
+Yuki Scott,Suki Nakamura,Process Technician,Manufacturing
+Hiro Walker,Suki Nakamura,Quality Engineer,Manufacturing
+Scarlett Martinez,Suki Nakamura,Quality Engineer,Manufacturing
+Noah Wright,Suki Nakamura,Quality Engineer,Manufacturing
+Elena Hernandez,SVP Customer,Director of Customer Success,Customer Success
+Reese Martin,SVP Customer,Director of Customer Success,Customer Success
+Daniel Martin,Elena Hernandez,Customer Success Manager,Customer Success
+Harley Rodriguez,Reese Martin,Customer Success Manager,Customer Success
+Grace Patel,Reese Martin,Customer Success Manager,Customer Success
+Mason Choi,Reese Martin,Customer Success Manager,Customer Success
+Grace Davis,Daniel Martin,Support Specialist,Customer Success
+Grace Roberts,Daniel Martin,Customer Success Manager,Customer Success
+Raj Carter,Daniel Martin,Implementation Specialist,Customer Success
+Alex Rivera,Daniel Martin,Technical Support Engineer,Customer Success
+Daniel Shah,Daniel Martin,Support Specialist,Customer Success
+Mateus Lewis,Daniel Martin,Technical Support Engineer,Customer Success
+Mateus Brown,Harley Rodriguez,Implementation Specialist,Customer Success
+Levi Singh,Harley Rodriguez,Support Specialist,Customer Success
+Mila Taylor,Harley Rodriguez,Customer Success Manager,Customer Success
+Chloe Huang,Harley Rodriguez,Customer Success Manager,Customer Success
+Drew Kumar,Harley Rodriguez,Support Specialist,Customer Success
+Mila White,Harley Rodriguez,Customer Success Manager,Customer Success
+Jack Adams,Grace Patel,Support Specialist,Customer Success
+Aria Adams,Grace Patel,Technical Support Engineer,Customer Success
+Jack Scott,Grace Patel,Implementation Specialist,Customer Success
+Liam Hernandez,Grace Patel,Implementation Specialist,Customer Success
+Jordan Choi,Grace Patel,Customer Success Manager,Customer Success
+Sidney Rodriguez,Mason Choi,Customer Success Manager,Customer Success
+Casey Young,Mason Choi,Support Specialist,Customer Success
+Jordan Zhao,Mason Choi,Support Specialist,Customer Success
+Noah Taylor,Mason Choi,Implementation Specialist,Customer Success
+Mei Anderson,Mason Choi,Support Specialist,Customer Success
+Suki Allen,VP Hardware,Director of Hardware,Hardware
+Sebastian Perez,VP Hardware,Director of Hardware,Hardware
+Amit Anderson,Suki Allen,Hardware Manager,Hardware
+Kai Flores,Suki Allen,Hardware Manager,Hardware
+Logan Lin,Suki Allen,Hardware Manager,Hardware
+Harper Liu,Sebastian Perez,Hardware Manager,Hardware
+Chloe Sanchez,Amit Anderson,Hardware Engineer,Hardware
+Isha Young,Amit Anderson,Hardware Engineer,Hardware
+Suki Hill,Amit Anderson,Test Engineer,Hardware
+Avery Hall,Amit Anderson,Test Engineer,Hardware
+Zoe Mitchell,Amit Anderson,Hardware Engineer,Hardware
+Andrés Baker,Amit Anderson,Hardware Engineer,Hardware
+Mateus Wilson,Kai Flores,Firmware Engineer,Hardware
